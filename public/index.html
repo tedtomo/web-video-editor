@@ -809,7 +809,16 @@
                     body: JSON.stringify(requestData)
                 });
 
-                const result = await response.json();
+                const contentType = response.headers.get('content-type');
+                let result;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('非JSONレスポンス:', text);
+                    throw new Error('サーバーエラー: 不正なレスポンス形式');
+                }
 
                 if (result.success) {
                     showAlert('success', '動画が作成されました！');
@@ -821,6 +830,7 @@
                 }
             } catch (error) {
                 showAlert('error', `エラー: ${error.message}`);
+                console.error('詳細エラー:', error);
             } finally {
                 editBtn.disabled = false;
                 editBtnText.textContent = '動画を作成';
