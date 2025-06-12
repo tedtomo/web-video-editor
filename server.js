@@ -28,7 +28,10 @@ fs.ensureDirSync(outputDir);
 const storage = multer.diskStorage({
   destination: uploadsDir,
   filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}${path.extname(file.originalname)}`;
+    // ファイル名をBufferでデコード（文字化け対策）
+    const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    const ext = path.extname(originalName);
+    const uniqueName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}${ext}`;
     cb(null, uniqueName);
   }
 });
@@ -237,6 +240,6 @@ app.listen(PORT, () => {
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log('📁 Uploads:', uploadsDir);
   console.log('📹 Output:', outputDir);
-  console.log('🔄 Version: 2024-12-06-v3 (Audio formats + Premium UI)');
+  console.log('🔄 Version: 2024-12-06-v4 (Apple-style UI + Image scaling)');
   console.log(`📅 Deployed at: ${new Date().toISOString()}`);
 });

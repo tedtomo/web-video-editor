@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 Web Video Editor - Premium</title>
+    <title>Video Editor — Professional Video Creation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,695 +15,634 @@
         }
 
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #8b5cf6;
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --dark: #1e293b;
-            --light: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --border: #e2e8f0;
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            /* Apple-inspired color palette */
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-tertiary: #515154;
+            --bg-primary: #fbfbfd;
+            --bg-secondary: #f5f5f7;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --accent-blue: #0071e3;
+            --accent-blue-hover: #0077ed;
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --accent-orange: #ff9500;
+            --border-light: rgba(0, 0, 0, 0.08);
+            --border-medium: rgba(0, 0, 0, 0.16);
+            --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-large: 0 12px 32px rgba(0, 0, 0, 0.12);
+            --blur-bg: saturate(180%) blur(20px);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: var(--dark);
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Premium Background Animation */
-        body::before {
-            content: '';
+        /* Hero gradient background */
+        .hero-gradient {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
-            z-index: -1;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(1deg); }
-            66% { transform: translate(-20px, 20px) rotate(-1deg); }
+            right: 0;
+            height: 600px;
+            background: linear-gradient(180deg, 
+                rgba(0, 113, 227, 0.02) 0%, 
+                rgba(0, 113, 227, 0) 100%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Navigation */
+        .nav {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Header */
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 40px;
-            padding-top: 20px;
+            padding: 80px 0 60px;
         }
 
         .header h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            letter-spacing: -1px;
+            font-size: 56px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, var(--text-primary) 0%, var(--text-tertiary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            font-weight: 300;
+            font-size: 21px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
+        /* Cards */
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            padding: 40px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-bg);
+            border-radius: 18px;
+            padding: 48px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card:hover {
+            box-shadow: var(--shadow-large);
             transform: translateY(-2px);
-            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
         }
 
-        .card h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-section {
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
+        .section-title {
+            font-size: 32px;
             font-weight: 600;
-            color: var(--dark);
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
+            margin-bottom: 32px;
+            letter-spacing: -0.01em;
         }
 
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 32px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .required-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            margin-left: 6px;
+            vertical-align: super;
+        }
+
+        /* File Upload */
         .file-upload {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 30px 20px;
+            border: 2px dashed var(--border-medium);
+            border-radius: 16px;
+            padding: 48px 24px;
             text-align: center;
+            transition: all 0.2s ease;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: var(--light);
+            background: var(--bg-primary);
             position: relative;
             overflow: hidden;
         }
 
-        .file-upload::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 0;
-        }
-
         .file-upload:hover {
-            border-color: var(--primary);
-            background: #f1f5f9;
-            transform: translateY(-2px);
-        }
-
-        .file-upload:hover::before {
-            opacity: 0.05;
-        }
-
-        .file-upload span {
-            position: relative;
-            z-index: 1;
-            font-size: 0.95rem;
-            color: #64748b;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .file-upload .icon {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-        }
-
-        .file-upload.has-file {
-            border-color: var(--success);
-            background: #f0fdf4;
-            border-style: solid;
-            animation: successPulse 0.5s ease;
-        }
-
-        @keyframes successPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .file-upload.has-file span {
-            color: var(--success);
-            font-weight: 600;
+            border-color: var(--accent-blue);
+            background: rgba(0, 113, 227, 0.02);
         }
 
         .file-upload.drag-over {
-            border-color: var(--primary);
-            background: #eef2ff;
-            transform: scale(1.02);
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
+            border-color: var(--accent-blue);
+            background: rgba(0, 113, 227, 0.04);
+            transform: scale(1.01);
+        }
+
+        .file-upload.has-file {
+            border-color: var(--accent-green);
+            border-style: solid;
+            background: rgba(52, 199, 89, 0.04);
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            opacity: 0.5;
+        }
+
+        .file-upload-text {
+            font-size: 17px;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-hint {
+            font-size: 15px;
+            color: var(--text-secondary);
         }
 
         .file-input {
             display: none;
         }
 
+        .file-info {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            font-size: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Input Fields */
         .input-field {
             width: 100%;
-            padding: 14px 18px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: var(--light);
-            font-weight: 500;
+            padding: 16px 20px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 17px;
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+            font-family: inherit;
+            color: var(--text-primary);
         }
 
         .input-field:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-            background: white;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
         }
 
+        .input-field::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        /* Buttons */
         .btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: inline-block;
+            padding: 16px 32px;
+            background: var(--accent-blue);
             color: white;
             border: none;
-            padding: 16px 32px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-family: inherit;
             width: 100%;
             position: relative;
             overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
+        .btn:hover {
+            background: var(--accent-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(0, 113, 227, 0.2);
         }
 
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn:active:not(:disabled) {
+        .btn:active {
             transform: translateY(0);
         }
 
         .btn:disabled {
-            opacity: 0.7;
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+            background: var(--bg-primary);
+            color: var(--accent-blue);
+            border: 1px solid var(--border-light);
         }
 
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-small);
+        }
+
+        .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Progress */
         .progress-container {
             display: none;
             text-align: center;
-            padding: 40px;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        .log-container {
-            margin-top: 20px;
-            background: var(--dark);
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 13px;
-            display: none;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-        }
-
-        .log-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .log-container::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-
-        .log-container::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
-        }
-
-        .log-entry {
-            margin-bottom: 8px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .log-info {
-            color: #60a5fa;
-            background: rgba(59, 130, 246, 0.1);
-            border-left: 3px solid #3b82f6;
-        }
-
-        .log-success {
-            color: #4ade80;
-            background: rgba(34, 197, 94, 0.1);
-            border-left: 3px solid #22c55e;
-        }
-
-        .log-error {
-            color: #f87171;
-            background: rgba(239, 68, 68, 0.1);
-            border-left: 3px solid #ef4444;
-        }
-
-        .log-warning {
-            color: #fbbf24;
-            background: rgba(245, 158, 11, 0.1);
-            border-left: 3px solid #f59e0b;
+            padding: 48px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-top: 32px;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid var(--primary);
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-light);
+            border-top-color: var(--accent-blue);
             border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            margin: 0 auto 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
+        .progress-message {
+            font-size: 19px;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        /* Logs */
+        .log-container {
+            background: var(--text-primary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            display: none;
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .log-info { background: rgba(0, 113, 227, 0.2); }
+        .log-success { background: rgba(52, 199, 89, 0.2); }
+        .log-error { background: rgba(255, 59, 48, 0.2); }
+        .log-warning { background: rgba(255, 149, 0, 0.2); }
+
+        /* Alerts */
         .alert {
             padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-            animation: slideInDown 0.3s ease-out;
-            font-weight: 500;
+            border-radius: 12px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.3s ease;
         }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .alert-success {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            color: #065f46;
-            border: 1px solid #6ee7b7;
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
         }
 
         .alert-error {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            color: #991b1b;
-            border: 1px solid #fca5a5;
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--accent-red);
         }
 
         .alert-warning {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-            border: 1px solid #fcd34d;
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--accent-orange);
         }
 
         .alert-info {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
-            border: 1px solid #93c5fd;
+            background: rgba(0, 113, 227, 0.1);
+            color: var(--accent-blue);
         }
 
+        /* Video Grid */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
         }
 
         .video-card {
-            background: white;
-            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
             border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            transition: all 0.2s ease;
         }
 
         .video-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
         }
 
         .video-preview {
             width: 100%;
             height: 180px;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            background: var(--bg-secondary);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            color: #9ca3af;
+            font-size: 48px;
             margin-bottom: 20px;
             position: relative;
             overflow: hidden;
         }
 
-        .video-preview::after {
-            content: '▶';
-            position: absolute;
-            font-size: 2rem;
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.8;
+        .video-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
         }
 
         .video-info {
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
         }
 
-        .file-info {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-top: 12px;
-            font-size: 14px;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .upload-success-icon {
-            display: inline-block;
-            animation: bounce 0.5s ease-out;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        .required-badge {
-            background: var(--error);
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .file-validation-error {
-            display: none;
-            color: var(--error);
-            font-size: 13px;
-            margin-top: 8px;
-            font-weight: 500;
-            animation: shake 0.3s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
+        /* Validation */
         .validation-container {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            border: 1px solid #fecaca;
-            border-radius: 10px;
+            background: rgba(255, 59, 48, 0.08);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             display: none;
-            animation: slideInDown 0.3s ease-out;
         }
 
-        .validation-container h3 {
-            color: var(--error);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .validation-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--accent-red);
+            margin-bottom: 12px;
         }
 
         .validation-list {
             list-style: none;
-            padding: 0;
         }
 
         .validation-list li {
-            padding: 8px 0;
-            color: #991b1b;
-            font-size: 0.95rem;
+            padding: 6px 0;
+            color: var(--text-secondary);
+            font-size: 15px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .validation-list li::before {
-            content: '❌';
-            font-size: 0.85rem;
-        }
-
-        .validation-list li.valid::before {
-            content: '✅';
+            content: '○';
+            color: var(--accent-red);
+            font-weight: 700;
         }
 
         .validation-list li.valid {
-            color: var(--success);
+            color: var(--accent-green);
         }
 
+        .validation-list li.valid::before {
+            content: '●';
+            color: var(--accent-green);
+        }
+
+        /* Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .two-column {
-                grid-template-columns: 1fr;
+            .header h1 {
+                font-size: 40px;
             }
             
-            .header h1 {
-                font-size: 2rem;
+            .header p {
+                font-size: 19px;
             }
             
             .card {
-                padding: 25px 20px;
+                padding: 32px 24px;
             }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
+    <div class="hero-gradient"></div>
+    
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">Video Editor</div>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <h1>🎬 Web Video Editor</h1>
-            <p>プロフェッショナルな動画編集をブラウザで簡単に</p>
+            <h1>Professional Video Creation</h1>
+            <p>Combine images, videos, and audio to create stunning content with precision and ease.</p>
         </div>
 
         <div id="alert-container"></div>
 
-        <!-- バリデーションメッセージ -->
+        <!-- Validation Message -->
         <div id="validation-container" class="validation-container">
-            <h3>⚠️ 必要なファイルを選択してください</h3>
+            <div class="validation-title">Required files</div>
             <ul class="validation-list" id="validation-list">
-                <li id="val-image">画像ファイル（オーバーレイ用）</li>
-                <li id="val-video">動画ファイル（背景用）</li>
-                <li id="val-audio">音声ファイル（BGM用）</li>
+                <li id="val-image">Overlay image</li>
+                <li id="val-video">Background video</li>
+                <li id="val-audio">Audio track</li>
             </ul>
         </div>
 
-        <!-- 動画編集フォーム -->
+        <!-- Main Editor -->
         <div class="card">
-            <h2>📋 動画編集設定</h2>
+            <h2 class="section-title">Create your video</h2>
             
             <form id="video-edit-form">
                 <div class="two-column">
-                    <!-- ファイルアップロード -->
+                    <!-- File Uploads -->
                     <div>
                         <div class="form-group">
-                            <label>
-                                オーバーレイ画像
-                                <span class="required-badge">必須</span>
+                            <label class="form-label">
+                                Overlay Image
+                                <span class="required-dot"></span>
                             </label>
                             <div class="file-upload drop-zone" id="image-drop-zone">
-                                <span id="overlay-image-text">
-                                    <span class="icon">🖼️</span>
-                                    <span>クリックまたはドラッグ&ドロップで画像を選択</span>
-                                    <small style="color: #94a3b8; font-size: 12px;">対応形式: JPG, PNG, GIF</small>
-                                </span>
+                                <span class="file-upload-icon">🖼</span>
+                                <div class="file-upload-text" id="overlay-image-text">Drop image here or click to browse</div>
+                                <div class="file-upload-hint">Supports JPG, PNG, GIF</div>
                                 <input type="file" id="overlay-image" class="file-input" accept="image/*">
                             </div>
-                            <div id="overlay-image-info" class="file-info" style="display: none;"></div>
-                            <div id="image-error" class="file-validation-error"></div>
+                            <div id="overlay-image-info" class="file-info"></div>
                         </div>
 
                         <div class="form-group">
-                            <label>
-                                背景動画
-                                <span class="required-badge">必須</span>
+                            <label class="form-label">
+                                Background Video
+                                <span class="required-dot"></span>
                             </label>
                             <div class="file-upload drop-zone" id="video-drop-zone">
-                                <span id="background-video-text">
-                                    <span class="icon">🎥</span>
-                                    <span>クリックまたはドラッグ&ドロップで動画を選択</span>
-                                    <small style="color: #94a3b8; font-size: 12px;">対応形式: MP4, MOV, AVI, WebM</small>
-                                </span>
+                                <span class="file-upload-icon">🎥</span>
+                                <div class="file-upload-text" id="background-video-text">Drop video here or click to browse</div>
+                                <div class="file-upload-hint">Supports MP4, MOV, AVI, WebM</div>
                                 <input type="file" id="background-video" class="file-input" accept="video/*">
                             </div>
-                            <div id="background-video-info" class="file-info" style="display: none;"></div>
-                            <div id="video-error" class="file-validation-error"></div>
+                            <div id="background-video-info" class="file-info"></div>
                         </div>
 
                         <div class="form-group">
-                            <label>
-                                音声ファイル
-                                <span class="required-badge">必須</span>
+                            <label class="form-label">
+                                Audio Track
+                                <span class="required-dot"></span>
                             </label>
                             <div class="file-upload drop-zone" id="audio-drop-zone">
-                                <span id="audio-file-text">
-                                    <span class="icon">🎵</span>
-                                    <span>クリックまたはドラッグ&ドロップで音声を選択</span>
-                                    <small style="color: #94a3b8; font-size: 12px;">対応形式: MP3, WAV, M4A, AAC, OGG</small>
-                                </span>
+                                <span class="file-upload-icon">🎵</span>
+                                <div class="file-upload-text" id="audio-file-text">Drop audio here or click to browse</div>
+                                <div class="file-upload-hint">Supports MP3, WAV, M4A, AAC, OGG</div>
                                 <input type="file" id="audio-file" class="file-input" accept="audio/*,video/*">
                             </div>
-                            <div id="audio-file-info" class="file-info" style="display: none;"></div>
-                            <div id="audio-error" class="file-validation-error"></div>
+                            <div id="audio-file-info" class="file-info"></div>
                         </div>
                     </div>
 
-                    <!-- 設定パラメータ -->
+                    <!-- Settings -->
                     <div>
                         <div class="form-group">
-                            <label for="duration">動画の長さ (秒)</label>
+                            <label class="form-label" for="duration">Duration (seconds)</label>
                             <input type="number" id="duration" class="input-field" value="20" min="1" max="120" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="video-start">背景動画の開始時間 (MM:SS)</label>
+                            <label class="form-label" for="video-start">Video start time</label>
                             <input type="text" id="video-start" class="input-field" value="0:00" placeholder="0:00">
                         </div>
 
                         <div class="form-group">
-                            <label for="audio-start">音声の開始時間 (MM:SS)</label>
+                            <label class="form-label" for="audio-start">Audio start time</label>
                             <input type="text" id="audio-start" class="input-field" value="0:00" placeholder="0:00">
                         </div>
 
                         <div class="form-group">
-                            <label for="output-name">出力ファイル名</label>
+                            <label class="form-label" for="output-name">Output filename</label>
                             <input type="text" id="output-name" class="input-field" placeholder="my_video.mp4">
                         </div>
 
                         <button type="submit" class="btn" id="edit-btn">
-                            <span id="edit-btn-text">動画編集開始</span>
+                            <span class="btn-text" id="edit-btn-text">Create Video</span>
                         </button>
                     </div>
                 </div>
@@ -708,15 +650,15 @@
 
             <div id="progress-container" class="progress-container">
                 <div class="spinner"></div>
-                <p id="progress-message">動画を編集中です...<br>しばらくお待ちください</p>
+                <div class="progress-message" id="progress-message">Creating your video...</div>
                 <div id="log-container" class="log-container"></div>
             </div>
         </div>
 
-        <!-- 出力動画一覧 -->
+        <!-- Video Library -->
         <div class="card">
-            <h2>📹 作成済み動画</h2>
-            <button class="btn btn-secondary" onclick="loadVideos()">リスト更新</button>
+            <h2 class="section-title">Your videos</h2>
+            <button class="btn btn-secondary" onclick="loadVideos()">Refresh</button>
             <div id="video-list" class="video-grid"></div>
         </div>
     </div>
@@ -728,7 +670,7 @@
             audio: null
         };
 
-        // バリデーションチェック
+        // Validation
         function validateFiles() {
             const validationContainer = document.getElementById('validation-container');
             const imageValid = !!uploadedFiles.image;
@@ -750,22 +692,22 @@
             return allValid;
         }
 
-        // 全体のアップロード進捗をチェック
+        // Upload progress
         function checkUploadProgress() {
             const totalFiles = 3;
             const uploadedCount = Object.values(uploadedFiles).filter(f => f !== null).length;
             
             if (uploadedCount === totalFiles) {
                 setTimeout(() => {
-                    showAlert('success', '✨ すべてのファイルがアップロードされました！編集を開始できます。');
-                }, 500);
+                    showAlert('success', 'All files uploaded. Ready to create your video.');
+                }, 300);
                 document.getElementById('validation-container').style.display = 'none';
             }
             
             validateFiles();
         }
 
-        // ログ機能
+        // Logging
         function addLog(message, type = 'info') {
             const logContainer = document.getElementById('log-container');
             logContainer.style.display = 'block';
@@ -784,10 +726,16 @@
             logContainer.style.display = 'none';
         }
 
-        // ドラッグ&ドロップ設定
-        function setupDragAndDrop(dropZoneId, inputId, fileType) {
+        // Drag and drop
+        function setupDragAndDrop(dropZoneId, inputId) {
             const dropZone = document.getElementById(dropZoneId);
             const input = document.getElementById(inputId);
+
+            dropZone.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    input.click();
+                }
+            });
 
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -804,57 +752,18 @@
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    const file = files[0];
-                    
-                    // ファイルタイプチェック
-                    const acceptedTypes = input.accept.split(',').map(type => type.trim());
-                    const fileTypeValid = acceptedTypes.some(type => {
-                        if (type.includes('*')) {
-                            const category = type.split('/')[0];
-                            return file.type.startsWith(category + '/');
-                        }
-                        return file.type === type;
-                    });
-
-                    if (fileTypeValid) {
-                        input.files = files;
-                        input.dispatchEvent(new Event('change', { bubbles: true }));
-                        addLog(`${file.name} をドロップしました`, 'info');
-                    } else {
-                        addLog(`${file.name} は対応していないファイル形式です`, 'error');
-                        showAlert('error', '対応していないファイル形式です');
-                    }
+                    input.files = files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
         }
 
-        // ドラッグ&ドロップ初期化
-        setupDragAndDrop('image-drop-zone', 'overlay-image', 'image');
-        setupDragAndDrop('video-drop-zone', 'background-video', 'video');
-        setupDragAndDrop('audio-drop-zone', 'audio-file', 'audio');
+        // Initialize drag and drop
+        setupDragAndDrop('image-drop-zone', 'overlay-image');
+        setupDragAndDrop('video-drop-zone', 'background-video');
+        setupDragAndDrop('audio-drop-zone', 'audio-file');
 
-        // 音声ファイルのクリックイベントを別途設定
-        document.getElementById('audio-drop-zone').addEventListener('click', function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                document.getElementById('audio-file').click();
-            }
-        });
-
-        // 画像ファイルのクリックイベント
-        document.getElementById('image-drop-zone').addEventListener('click', function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                document.getElementById('overlay-image').click();
-            }
-        });
-
-        // 動画ファイルのクリックイベント
-        document.getElementById('video-drop-zone').addEventListener('click', function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                document.getElementById('background-video').click();
-            }
-        });
-
-        // ファイルアップロード処理
+        // File upload handlers
         document.getElementById('background-video').addEventListener('change', function(e) {
             if (e.target.files[0]) {
                 handleFileUpload(e.target.files[0], 'backgroundVideo', 'background-video-text', 'background-video-info');
@@ -880,8 +789,7 @@
             formData.append('file', file);
 
             try {
-                addLog(`${file.name} をアップロード中...`, 'info');
-                showAlert('info', `${file.name} をアップロード中...`);
+                addLog(`Uploading ${file.name}...`, 'info');
 
                 const response = await fetch('/api/upload', {
                     method: 'POST',
@@ -889,9 +797,7 @@
                 });
 
                 if (!response.ok) {
-                    const text = await response.text();
-                    console.error('Response:', text);
-                    throw new Error(`アップロードエラー: ${response.status}`);
+                    throw new Error(`Upload failed: ${response.status}`);
                 }
 
                 const result = await response.json();
@@ -899,90 +805,60 @@
                 if (result.success) {
                     uploadedFiles[type] = result.filename;
                     
-                    // アイコンアニメーション付きで表示
                     const textElement = document.getElementById(textElementId);
-                    textElement.innerHTML = `<span class="upload-success-icon">✅</span> ${result.originalName}`;
-                    textElement.parentElement.classList.add('has-file');
-                    
-                    // ファイルアップロードエリアを視覚的に変更
-                    const dropZone = textElement.parentElement;
-                    dropZone.style.transition = 'all 0.3s ease';
+                    textElement.textContent = result.originalName;
+                    textElement.parentElement.parentElement.classList.add('has-file');
                     
                     const infoElement = document.getElementById(infoElementId);
                     infoElement.innerHTML = `
-                        <strong>📁 ファイル名:</strong> ${result.originalName}<br>
-                        <strong>📊 サイズ:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB<br>
-                        <strong>📍 状態:</strong> <span style="color: var(--success); font-weight: 600;">アップロード完了</span>
+                        <strong>File:</strong> ${result.originalName}<br>
+                        <strong>Size:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB
                     `;
                     infoElement.style.display = 'block';
 
-                    // プログレスチェック
                     checkUploadProgress();
 
-                    addLog(`${result.originalName} のアップロードが完了しました`, 'success');
-                    showAlert('success', `${result.originalName} のアップロードが完了しました`);
+                    addLog(`${result.originalName} uploaded successfully`, 'success');
                 } else {
-                    addLog(`アップロードエラー: ${result.error}`, 'error');
-                    showAlert('error', `アップロードエラー: ${result.error}`);
+                    throw new Error(result.error);
                 }
 
             } catch (error) {
-                console.error('Upload error:', error);
-                addLog(`アップロードエラー: ${error.message}`, 'error');
-                showAlert('error', `アップロードエラー: ${error.message}`);
+                addLog(`Upload error: ${error.message}`, 'error');
+                showAlert('error', `Upload failed: ${error.message}`);
             }
         }
 
-        // 動画編集フォーム送信
+        // Form submission
         document.getElementById('video-edit-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             clearLogs();
-            addLog('動画編集を開始します...', 'info');
+            addLog('Starting video creation...', 'info');
 
-            // バリデーション
             if (!validateFiles()) {
-                const missing = [];
-                if (!uploadedFiles.image) missing.push('画像');
-                if (!uploadedFiles.backgroundVideo) missing.push('動画');
-                if (!uploadedFiles.audio) missing.push('音声');
-                
-                const errorMsg = `必要なファイルをアップロードしてください`;
-                addLog(errorMsg, 'error');
-                showAlert('warning', errorMsg);
-                
-                // バリデーションコンテナをハイライト
-                const validationContainer = document.getElementById('validation-container');
-                validationContainer.style.animation = 'shake 0.5s ease';
-                setTimeout(() => {
-                    validationContainer.style.animation = '';
-                }, 500);
-                
+                showAlert('warning', 'Please upload all required files');
+                document.getElementById('validation-container').scrollIntoView({ behavior: 'smooth' });
                 return;
             }
 
             const duration = document.getElementById('duration').value;
             const videoStart = document.getElementById('video-start').value;
             const audioStart = document.getElementById('audio-start').value;
-            const outputName = document.getElementById('output-name').value || `edited_${Date.now()}.mp4`;
+            const outputName = document.getElementById('output-name').value || `video_${Date.now()}.mp4`;
 
-            // UI更新
+            // Update UI
             const editBtn = document.getElementById('edit-btn');
             const editBtnText = document.getElementById('edit-btn-text');
             editBtn.disabled = true;
-            editBtnText.innerHTML = '⏳ 処理中...';
-            editBtn.style.opacity = '0.7';
-            editBtn.style.transform = 'scale(0.98)';
+            editBtnText.textContent = 'Creating...';
             
             document.getElementById('progress-container').style.display = 'block';
-            document.getElementById('progress-message').innerHTML = '動画を編集中です...<br>しばらくお待ちください';
+            document.getElementById('progress-message').textContent = 'Creating your video...';
 
-            addLog(`設定: 動画長=${duration}秒, 動画開始=${videoStart}, 音声開始=${audioStart}`, 'info');
-            addLog(`出力ファイル名: ${outputName}`, 'info');
+            addLog(`Duration: ${duration}s, Video start: ${videoStart}, Audio start: ${audioStart}`, 'info');
 
             try {
-                addLog('サーバーに編集リクエストを送信中...', 'info');
-                
                 const response = await fetch('/api/edit-video', {
                     method: 'POST',
                     headers: {
@@ -1002,43 +878,29 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    addLog(`動画編集が完了しました！出力ファイル: ${result.outputFile}`, 'success');
-                    document.getElementById('progress-message').innerHTML = '✅ 動画編集が完了しました！';
-                    showAlert('success', `✅ 動画編集完了！\n出力ファイル: ${result.outputFile}`);
-                    loadVideos(); // 動画リスト更新
+                    addLog(`Video created: ${result.outputFile}`, 'success');
+                    document.getElementById('progress-message').textContent = 'Video created successfully!';
+                    showAlert('success', 'Your video is ready!');
+                    loadVideos();
                     
-                    // 3秒後に進行状況を非表示
                     setTimeout(() => {
                         document.getElementById('progress-container').style.display = 'none';
-                    }, 3000);
+                    }, 2000);
                 } else {
-                    addLog(`編集エラー: ${result.error}`, 'error');
-                    document.getElementById('progress-message').innerHTML = '❌ 編集エラーが発生しました';
-                    showAlert('error', `編集エラー: ${result.error}`);
+                    throw new Error(result.error);
                 }
 
             } catch (error) {
-                addLog(`システムエラー: ${error.message}`, 'error');
-                document.getElementById('progress-message').innerHTML = '❌ システムエラーが発生しました';
-                showAlert('error', `システムエラー: ${error.message}`);
+                addLog(`Error: ${error.message}`, 'error');
+                document.getElementById('progress-message').textContent = 'Creation failed';
+                showAlert('error', `Error: ${error.message}`);
             } finally {
-                const editBtn = document.getElementById('edit-btn');
-                const editBtnText = document.getElementById('edit-btn-text');
                 editBtn.disabled = false;
-                editBtnText.innerHTML = '動画編集開始';
-                editBtn.style.opacity = '1';
-                editBtn.style.transform = 'scale(1)';
-                
-                // エラーの場合は5秒後に進行状況を非表示
-                if (document.getElementById('progress-message').innerHTML.includes('❌')) {
-                    setTimeout(() => {
-                        document.getElementById('progress-container').style.display = 'none';
-                    }, 5000);
-                }
+                editBtnText.textContent = 'Create Video';
             }
         });
 
-        // 動画リスト読み込み
+        // Load videos
         async function loadVideos() {
             try {
                 const response = await fetch('/api/videos');
@@ -1047,33 +909,29 @@
                 const videoList = document.getElementById('video-list');
 
                 if (videos.length === 0) {
-                    videoList.innerHTML = '<p style="text-align: center; color: #6b7280; grid-column: 1 / -1;">まだ作成された動画がありません</p>';
+                    videoList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1; padding: 48px 0;">No videos yet. Create your first video above.</p>';
                     return;
                 }
 
                 videoList.innerHTML = videos.map(video => `
                     <div class="video-card">
                         <div class="video-preview">🎬</div>
-                        <h4 style="margin-bottom: 10px; font-weight: 600;">${video.filename}</h4>
+                        <div class="video-title">${video.filename}</div>
                         <div class="video-info">
-                            📏 サイズ: ${video.size} MB<br>
-                            📅 作成日: ${new Date(video.created).toLocaleString('ja-JP')}
+                            ${video.size} MB • ${new Date(video.created).toLocaleDateString()}
                         </div>
                         <button class="btn btn-secondary" onclick="downloadVideo('${video.url}', '${video.filename}')">
-                            ⬇️ ダウンロード
-                        </button>
-                        <button class="btn" onclick="previewVideo('${video.url}')" style="margin-top: 10px;">
-                            👁️ プレビュー
+                            Download
                         </button>
                     </div>
                 `).join('');
 
             } catch (error) {
-                showAlert('error', `動画リスト取得エラー: ${error.message}`);
+                showAlert('error', `Failed to load videos: ${error.message}`);
             }
         }
 
-        // 動画ダウンロード
+        // Download video
         function downloadVideo(url, filename) {
             const link = document.createElement('a');
             link.href = url;
@@ -1083,45 +941,26 @@
             document.body.removeChild(link);
         }
 
-        // 動画プレビュー
-        function previewVideo(url) {
-            window.open(url, '_blank');
-        }
-
-        // アラート表示
+        // Alerts
         function showAlert(type, message) {
             const container = document.getElementById('alert-container');
-            const alertClass = type === 'success' ? 'alert-success' : 
-                             type === 'error' ? 'alert-error' : 
-                             type === 'warning' ? 'alert-warning' : 'alert-info';
-            
             const alertDiv = document.createElement('div');
-            alertDiv.className = `alert ${alertClass}`;
-            alertDiv.style.display = 'flex';
-            
-            const icon = type === 'success' ? '✅' : 
-                        type === 'error' ? '❌' : 
-                        type === 'warning' ? '⚠️' : 'ℹ️';
-            
-            alertDiv.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
             
             container.innerHTML = '';
             container.appendChild(alertDiv);
 
             setTimeout(() => {
                 alertDiv.style.opacity = '0';
-                alertDiv.style.transition = 'opacity 0.3s ease-out';
-                setTimeout(() => {
-                    container.innerHTML = '';
-                }, 300);
-            }, type === 'error' ? 7000 : 5000);
+                setTimeout(() => container.innerHTML = '', 300);
+            }, 5000);
         }
 
-        // 初期化
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadVideos();
             validateFiles();
-            console.log('🎬 Web Video Editor Premium 初期化完了');
         });
     </script>
 </body>
