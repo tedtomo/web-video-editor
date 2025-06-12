@@ -64,10 +64,14 @@ class VideoEditor {
         
       // 動画情報を取得してスケーリング
       ff.complexFilter([
-        // 動画サイズを基準に画像をスケール（動画幅の80%、高さは比率維持）
-        '[0:v][2:v]scale2ref=w=\'iw*0.8\':h=\'ow/mdar\'[vid][img]',
+        // 最初に画像の幅と高さを取得
+        '[2:v]scale=iw:ih[img_orig]',
+        // 動画と画像を比較して80%スケール
+        '[0:v][img_orig]scale2ref=iw:ih[vid][img_ref]',
+        // 画像を動画幅の80%にスケール
+        '[img_ref]scale=iw*0.8:-1[scaled]',
         // スケールした画像を中央に配置
-        '[vid][img]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
+        '[vid][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
       ]);
       
       // 出力設定
