@@ -60,12 +60,14 @@ class VideoEditor {
         .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()])
         .input(audioPath)
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
-        .input(imagePath)
-        .inputOptions(['-loop', '1', '-t', duration.toString()]);
+        .input(imagePath);
         
       // シンプルなオーバーレイ設定
       ff.complexFilter([
-        '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
+        // 画像を固定サイズにスケール（例：幅640px、高さは自動）
+        '[2:v]scale=640:-1[scaled]',
+        // スケールした画像を中央に配置
+        '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
       ]);
       
       // 出力設定
