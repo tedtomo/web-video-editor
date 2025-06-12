@@ -53,39 +53,39 @@ class VideoEditor {
     console.log('- 出力:', outputPath);
 
     return new Promise((resolve, reject) => {
-      ffmpeg()
-        // 背景動画（トリミング）
-        .input(backgroundVideoPath)
+      const ff = ffmpeg();
+      
+      // 入力ファイルを追加
+      ff.input(backgroundVideoPath)
         .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()])
-        
-        // 音声（トリミング）
         .input(audioPath)
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
-        
-        // 画像オーバーレイ
         .input(imagePath)
+        .inputOptions(['-loop', '1', '-t', duration.toString()]);
         
-        // フィルター設定：画像を中央配置でオーバーレイ（80%は一旦保留）
-        .complexFilter([
-          // 画像をオーバーレイ（中央配置）
-          '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
-        ])
-        
-        // 出力設定
-        .outputOptions([
-          '-map', '[outv]',      // 合成された映像
-          '-map', '1:a',         // 音声入力
-          '-c:v', 'libx264',     // 動画コーデック
-          '-c:a', 'aac',         // 音声コーデック
-          '-preset', 'fast',     // エンコード速度
-          '-crf', '23',          // 品質設定
-          '-y'                   // 上書き許可
+      // シンプルなオーバーレイ設定
+      ff.complexFilter([
+        '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
+      ]);
+      
+      // 出力設定
+      ff.outputOptions([
+          '-map', '[outv]',
+          '-map', '1:a',
+          '-c:v', 'libx264',
+          '-c:a', 'aac',
+          '-preset', 'fast',
+          '-crf', '23',
+          '-y'
         ])
         .output(outputPath)
         
         // イベントハンドラー
         .on('start', (commandLine) => {
           console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('stderr', (stderrLine) => {
+          console.log('FFmpeg:', stderrLine);
         })
         .on('progress', (progress) => {
           if (progress.percent) {
@@ -102,6 +102,7 @@ class VideoEditor {
         })
         .on('error', (err) => {
           console.error('❌ FFmpeg エラー:', err.message);
+          console.error('詳細:', err);
           reject(new Error(`動画合成失敗: ${err.message}`));
         })
         .run();
