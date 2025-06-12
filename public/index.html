@@ -908,6 +908,11 @@
                 addLog(`エラー: ${error.message}`, 'error');
                 document.getElementById('progress-message').textContent = '作成に失敗しました';
                 showAlert('error', `エラー: ${error.message}`);
+                
+                // エラー時は3秒後に進行状況を非表示
+                setTimeout(() => {
+                    document.getElementById('progress-container').style.display = 'none';
+                }, 3000);
             } finally {
                 editBtn.disabled = false;
                 editBtnText.textContent = '動画を作成';
