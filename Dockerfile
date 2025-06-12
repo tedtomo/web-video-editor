@@ -21,5 +21,8 @@ RUN mkdir -p uploads output
 # ポート公開
 EXPOSE 3003
 
+# 環境変数設定
+ENV PORT=3003
+
 # アプリケーション起動
 CMD ["node", "server.js"]
