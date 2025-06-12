@@ -153,7 +153,7 @@ app.post('/api/edit-video', async (req, res) => {
     }
 
     console.log('🎬 動画編集開始');
-    console.log('設定:', { backgroundVideoFile, imageFile, audioFile, duration, videoStart, audioStart, outputName });
+    console.log('設定:', JSON.stringify({ backgroundVideoFile, imageFile, audioFile, duration, videoStart, audioStart, outputName }, null, 2));
 
     // ファイルパス構築
     const backgroundVideoPath = path.join(uploadsDir, backgroundVideoFile);
@@ -161,9 +161,26 @@ app.post('/api/edit-video', async (req, res) => {
     const audioPath = path.join(uploadsDir, audioFile);
 
     // ファイル存在確認
-    if (!fs.existsSync(backgroundVideoPath) || !fs.existsSync(imagePath) || !fs.existsSync(audioPath)) {
-      return res.status(400).json({ error: 'アップロードされたファイルが見つかりません' });
+    const missingFiles = [];
+    if (!fs.existsSync(backgroundVideoPath)) {
+      missingFiles.push(`背景動画: ${backgroundVideoPath}`);
     }
+    if (!fs.existsSync(imagePath)) {
+      missingFiles.push(`画像: ${imagePath}`);
+    }
+    if (!fs.existsSync(audioPath)) {
+      missingFiles.push(`音声: ${audioPath}`);
+    }
+    
+    if (missingFiles.length > 0) {
+      console.error('❌ ファイルが見つかりません:', missingFiles);
+      return res.status(400).json({ 
+        error: 'アップロードされたファイルが見つかりません',
+        missingFiles: missingFiles 
+      });
+    }
+    
+    console.log('✅ ファイル確認完了');
 
     // 動画編集実行
     const result = await videoEditor.createCompositeVideo({
@@ -186,7 +203,11 @@ app.post('/api/edit-video', async (req, res) => {
 
   } catch (error) {
     console.error('❌ 動画編集エラー:', error);
-    res.status(500).json({ error: error.message });
+    console.error('スタックトレース:', error.stack);
+    res.status(500).json({ 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
   }
 });
 
@@ -240,6 +261,7 @@ app.listen(PORT, () => {
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log('📁 Uploads:', uploadsDir);
   console.log('📹 Output:', outputDir);
-  console.log('🔄 Version: 2024-12-06-v4 (Apple-style UI + Image scaling)');
+  console.log('🔄 Version: 2024-12-06-v5 (Japanese UI + Debug logs)');
   console.log(`📅 Deployed at: ${new Date().toISOString()}`);
+  console.log('✅ Server is ready to accept requests');
 });
