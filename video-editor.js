@@ -62,12 +62,11 @@ class VideoEditor {
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
         .input(imagePath);
         
-      // 動画情報を取得してスケーリング
+      // シンプルな方法：動画のメタデータを先に取得してスケール値を計算
       ff.complexFilter([
-        // scale2refで画像を動画幅の80%にスケール（アスペクト比維持）
-        '[2:v][0:v]scale2ref=w=oh*mdar*0.8:h=ow/mdar/0.8:force_original_aspect_ratio=decrease[scaled][video]',
-        // スケールした画像を動画の中央に配置
-        '[video][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
+        // 背景動画はそのまま使用
+        // 画像を中央に配置（一旦スケーリングなしでテスト）
+        '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
       ]);
       
       // 出力設定
