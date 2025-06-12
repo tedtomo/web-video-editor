@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Editor — Professional Video Creation</title>
+    <title>動画エディター — プロフェッショナル動画作成</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -445,50 +445,19 @@
             margin-bottom: 16px;
         }
 
-        /* Validation */
-        .validation-container {
-            background: rgba(255, 59, 48, 0.08);
-            border: 1px solid rgba(255, 59, 48, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-            display: none;
-        }
-
-        .validation-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--accent-red);
+        /* Inline Validation */
+        .validation-inline {
             margin-bottom: 12px;
+            text-align: center;
         }
-
-        .validation-list {
-            list-style: none;
-        }
-
-        .validation-list li {
-            padding: 6px 0;
-            color: var(--text-secondary);
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .validation-list li::before {
-            content: '○';
+        
+        .validation-text {
             color: var(--accent-red);
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .validation-list li.valid {
-            color: var(--accent-green);
-        }
-
-        .validation-list li.valid::before {
-            content: '●';
-            color: var(--accent-green);
-        }
+        /* Removed old validation styles */
 
         /* Layout */
         .two-column {
@@ -544,7 +513,7 @@
     <nav class="nav">
         <div class="container">
             <div class="nav-content">
-                <div class="logo">Video Editor</div>
+                <div class="logo">動画エディター</div>
             </div>
         </div>
     </nav>
@@ -552,25 +521,17 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>Professional Video Creation</h1>
-            <p>Combine images, videos, and audio to create stunning content with precision and ease.</p>
+            <h1>プロフェッショナル動画作成</h1>
+            <p>画像、動画、音声を組み合わせて、簡単に美しいコンテンツを作成</p>
         </div>
 
         <div id="alert-container"></div>
 
-        <!-- Validation Message -->
-        <div id="validation-container" class="validation-container">
-            <div class="validation-title">Required files</div>
-            <ul class="validation-list" id="validation-list">
-                <li id="val-image">Overlay image</li>
-                <li id="val-video">Background video</li>
-                <li id="val-audio">Audio track</li>
-            </ul>
-        </div>
+        <!-- Validation Message moved to form -->
 
         <!-- Main Editor -->
         <div class="card">
-            <h2 class="section-title">Create your video</h2>
+            <h2 class="section-title">動画を作成</h2>
             
             <form id="video-edit-form">
                 <div class="two-column">
@@ -578,13 +539,13 @@
                     <div>
                         <div class="form-group">
                             <label class="form-label">
-                                Overlay Image
+                                オーバーレイ画像
                                 <span class="required-dot"></span>
                             </label>
                             <div class="file-upload drop-zone" id="image-drop-zone">
                                 <span class="file-upload-icon">🖼</span>
-                                <div class="file-upload-text" id="overlay-image-text">Drop image here or click to browse</div>
-                                <div class="file-upload-hint">Supports JPG, PNG, GIF</div>
+                                <div class="file-upload-text" id="overlay-image-text">ここに画像をドロップまたはクリックして選択</div>
+                                <div class="file-upload-hint">対応形式: JPG, PNG, GIF</div>
                                 <input type="file" id="overlay-image" class="file-input" accept="image/*">
                             </div>
                             <div id="overlay-image-info" class="file-info"></div>
@@ -592,13 +553,13 @@
 
                         <div class="form-group">
                             <label class="form-label">
-                                Background Video
+                                背景動画
                                 <span class="required-dot"></span>
                             </label>
                             <div class="file-upload drop-zone" id="video-drop-zone">
                                 <span class="file-upload-icon">🎥</span>
-                                <div class="file-upload-text" id="background-video-text">Drop video here or click to browse</div>
-                                <div class="file-upload-hint">Supports MP4, MOV, AVI, WebM</div>
+                                <div class="file-upload-text" id="background-video-text">ここに動画をドロップまたはクリックして選択</div>
+                                <div class="file-upload-hint">対応形式: MP4, MOV, AVI, WebM</div>
                                 <input type="file" id="background-video" class="file-input" accept="video/*">
                             </div>
                             <div id="background-video-info" class="file-info"></div>
@@ -606,13 +567,13 @@
 
                         <div class="form-group">
                             <label class="form-label">
-                                Audio Track
+                                音声ファイル
                                 <span class="required-dot"></span>
                             </label>
                             <div class="file-upload drop-zone" id="audio-drop-zone">
                                 <span class="file-upload-icon">🎵</span>
-                                <div class="file-upload-text" id="audio-file-text">Drop audio here or click to browse</div>
-                                <div class="file-upload-hint">Supports MP3, WAV, M4A, AAC, OGG</div>
+                                <div class="file-upload-text" id="audio-file-text">ここに音声をドロップまたはクリックして選択</div>
+                                <div class="file-upload-hint">対応形式: MP3, WAV, M4A, AAC, OGG</div>
                                 <input type="file" id="audio-file" class="file-input" accept="audio/*,video/*">
                             </div>
                             <div id="audio-file-info" class="file-info"></div>
@@ -622,27 +583,32 @@
                     <!-- Settings -->
                     <div>
                         <div class="form-group">
-                            <label class="form-label" for="duration">Duration (seconds)</label>
+                            <label class="form-label" for="duration">動画の長さ（秒）</label>
                             <input type="number" id="duration" class="input-field" value="20" min="1" max="120" required>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="video-start">Video start time</label>
+                            <label class="form-label" for="video-start">動画開始時間</label>
                             <input type="text" id="video-start" class="input-field" value="0:00" placeholder="0:00">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="audio-start">Audio start time</label>
+                            <label class="form-label" for="audio-start">音声開始時間</label>
                             <input type="text" id="audio-start" class="input-field" value="0:00" placeholder="0:00">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="output-name">Output filename</label>
+                            <label class="form-label" for="output-name">出力ファイル名</label>
                             <input type="text" id="output-name" class="input-field" placeholder="my_video.mp4">
                         </div>
 
+                        <!-- Inline validation message -->
+                        <div id="validation-container" class="validation-inline" style="display: none;">
+                            <small class="validation-text">※ 必要なファイルを選択してください</small>
+                        </div>
+                        
                         <button type="submit" class="btn" id="edit-btn">
-                            <span class="btn-text" id="edit-btn-text">Create Video</span>
+                            <span class="btn-text" id="edit-btn-text">動画を作成</span>
                         </button>
                     </div>
                 </div>
@@ -650,15 +616,15 @@
 
             <div id="progress-container" class="progress-container">
                 <div class="spinner"></div>
-                <div class="progress-message" id="progress-message">Creating your video...</div>
+                <div class="progress-message" id="progress-message">動画を作成しています...</div>
                 <div id="log-container" class="log-container"></div>
             </div>
         </div>
 
         <!-- Video Library -->
         <div class="card">
-            <h2 class="section-title">Your videos</h2>
-            <button class="btn btn-secondary" onclick="loadVideos()">Refresh</button>
+            <h2 class="section-title">作成した動画</h2>
+            <button class="btn btn-secondary" onclick="loadVideos()">更新</button>
             <div id="video-list" class="video-grid"></div>
         </div>
     </div>
@@ -683,11 +649,7 @@
             
             const allValid = imageValid && videoValid && audioValid;
             
-            if (!allValid) {
-                validationContainer.style.display = 'block';
-            } else {
-                validationContainer.style.display = 'none';
-            }
+            // No need to show/hide validation container here
             
             return allValid;
         }
@@ -699,9 +661,9 @@
             
             if (uploadedCount === totalFiles) {
                 setTimeout(() => {
-                    showAlert('success', 'All files uploaded. Ready to create your video.');
+                    showAlert('success', 'すべてのファイルがアップロードされました。');
                 }, 300);
-                document.getElementById('validation-container').style.display = 'none';
+                // Validation container is now inline
             }
             
             validateFiles();
@@ -789,7 +751,7 @@
             formData.append('file', file);
 
             try {
-                addLog(`Uploading ${file.name}...`, 'info');
+                addLog(`${file.name} をアップロード中...`, 'info');
 
                 const response = await fetch('/api/upload', {
                     method: 'POST',
@@ -797,7 +759,7 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Upload failed: ${response.status}`);
+                    throw new Error(`アップロード失敗: ${response.status}`);
                 }
 
                 const result = await response.json();
@@ -811,21 +773,21 @@
                     
                     const infoElement = document.getElementById(infoElementId);
                     infoElement.innerHTML = `
-                        <strong>File:</strong> ${result.originalName}<br>
-                        <strong>Size:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB
+                        <strong>ファイル名:</strong> ${result.originalName}<br>
+                        <strong>サイズ:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB
                     `;
                     infoElement.style.display = 'block';
 
                     checkUploadProgress();
 
-                    addLog(`${result.originalName} uploaded successfully`, 'success');
+                    addLog(`${result.originalName} のアップロードが完了しました`, 'success');
                 } else {
                     throw new Error(result.error);
                 }
 
             } catch (error) {
-                addLog(`Upload error: ${error.message}`, 'error');
-                showAlert('error', `Upload failed: ${error.message}`);
+                addLog(`アップロードエラー: ${error.message}`, 'error');
+                showAlert('error', `アップロード失敗: ${error.message}`);
             }
         }
 
@@ -834,12 +796,14 @@
             e.preventDefault();
             
             clearLogs();
-            addLog('Starting video creation...', 'info');
+            addLog('動画作成を開始します...', 'info');
 
             if (!validateFiles()) {
-                showAlert('warning', 'Please upload all required files');
-                document.getElementById('validation-container').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('validation-container').style.display = 'block';
+                // スクロールしないでボタンの近くに表示
                 return;
+            } else {
+                document.getElementById('validation-container').style.display = 'none';
             }
 
             const duration = document.getElementById('duration').value;
@@ -851,12 +815,12 @@
             const editBtn = document.getElementById('edit-btn');
             const editBtnText = document.getElementById('edit-btn-text');
             editBtn.disabled = true;
-            editBtnText.textContent = 'Creating...';
+            editBtnText.textContent = '作成中...';
             
             document.getElementById('progress-container').style.display = 'block';
-            document.getElementById('progress-message').textContent = 'Creating your video...';
+            document.getElementById('progress-message').textContent = '動画を作成しています...';
 
-            addLog(`Duration: ${duration}s, Video start: ${videoStart}, Audio start: ${audioStart}`, 'info');
+            addLog(`長さ: ${duration}秒, 動画開始: ${videoStart}, 音声開始: ${audioStart}`, 'info');
 
             try {
                 const response = await fetch('/api/edit-video', {
@@ -878,9 +842,9 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    addLog(`Video created: ${result.outputFile}`, 'success');
-                    document.getElementById('progress-message').textContent = 'Video created successfully!';
-                    showAlert('success', 'Your video is ready!');
+                    addLog(`動画が作成されました: ${result.outputFile}`, 'success');
+                    document.getElementById('progress-message').textContent = '動画の作成が完了しました！';
+                    showAlert('success', '動画の準備ができました！');
                     loadVideos();
                     
                     setTimeout(() => {
@@ -891,12 +855,12 @@
                 }
 
             } catch (error) {
-                addLog(`Error: ${error.message}`, 'error');
-                document.getElementById('progress-message').textContent = 'Creation failed';
-                showAlert('error', `Error: ${error.message}`);
+                addLog(`エラー: ${error.message}`, 'error');
+                document.getElementById('progress-message').textContent = '作成に失敗しました';
+                showAlert('error', `エラー: ${error.message}`);
             } finally {
                 editBtn.disabled = false;
-                editBtnText.textContent = 'Create Video';
+                editBtnText.textContent = '動画を作成';
             }
         });
 
@@ -909,7 +873,7 @@
                 const videoList = document.getElementById('video-list');
 
                 if (videos.length === 0) {
-                    videoList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1; padding: 48px 0;">No videos yet. Create your first video above.</p>';
+                    videoList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1; padding: 48px 0;">まだ動画がありません。上のフォームから最初の動画を作成してください。</p>';
                     return;
                 }
 
@@ -921,13 +885,13 @@
                             ${video.size} MB • ${new Date(video.created).toLocaleDateString()}
                         </div>
                         <button class="btn btn-secondary" onclick="downloadVideo('${video.url}', '${video.filename}')">
-                            Download
+                            ダウンロード
                         </button>
                     </div>
                 `).join('');
 
             } catch (error) {
-                showAlert('error', `Failed to load videos: ${error.message}`);
+                showAlert('error', `動画の読み込み失敗: ${error.message}`);
             }
         }
 
