@@ -155,12 +155,17 @@
 
         .required-dot {
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background: var(--accent-red);
             border-radius: 50%;
             margin-left: 6px;
-            vertical-align: super;
+            vertical-align: middle;
+            transition: all 0.3s ease;
+        }
+        
+        .required-dot.uploaded {
+            background: var(--accent-green);
         }
 
         /* File Upload */
@@ -456,6 +461,12 @@
             font-size: 14px;
             font-weight: 500;
         }
+        
+        /* Upload Error */
+        .file-upload.error {
+            border-color: var(--accent-red);
+            background: rgba(255, 59, 48, 0.04);
+        }
 
         /* Removed old validation styles */
 
@@ -540,7 +551,7 @@
                         <div class="form-group">
                             <label class="form-label">
                                 オーバーレイ画像
-                                <span class="required-dot"></span>
+                                <span class="required-dot" id="image-status"></span>
                             </label>
                             <div class="file-upload drop-zone" id="image-drop-zone">
                                 <span class="file-upload-icon">🖼</span>
@@ -554,7 +565,7 @@
                         <div class="form-group">
                             <label class="form-label">
                                 背景動画
-                                <span class="required-dot"></span>
+                                <span class="required-dot" id="video-status"></span>
                             </label>
                             <div class="file-upload drop-zone" id="video-drop-zone">
                                 <span class="file-upload-icon">🎥</span>
@@ -568,7 +579,7 @@
                         <div class="form-group">
                             <label class="form-label">
                                 音声ファイル
-                                <span class="required-dot"></span>
+                                <span class="required-dot" id="audio-status"></span>
                             </label>
                             <div class="file-upload drop-zone" id="audio-drop-zone">
                                 <span class="file-upload-icon">🎵</span>
@@ -638,18 +649,18 @@
 
         // Validation
         function validateFiles() {
-            const validationContainer = document.getElementById('validation-container');
             const imageValid = !!uploadedFiles.image;
             const videoValid = !!uploadedFiles.backgroundVideo;
             const audioValid = !!uploadedFiles.audio;
             
-            document.getElementById('val-image').className = imageValid ? 'valid' : '';
-            document.getElementById('val-video').className = videoValid ? 'valid' : '';
-            document.getElementById('val-audio').className = audioValid ? 'valid' : '';
-            
             const allValid = imageValid && videoValid && audioValid;
             
-            // No need to show/hide validation container here
+            // ボタンの有効/無効を切り替え
+            const editBtn = document.getElementById('edit-btn');
+            if (editBtn) {
+                // ボタンを常に有効にして、クリック時にバリデーション
+                editBtn.disabled = false;
+            }
             
             return allValid;
         }
@@ -746,6 +757,18 @@
 
         async function handleFileUpload(file, type, textElementId, infoElementId) {
             if (!file) return;
+            
+            // 既存のファイル情報をクリア
+            uploadedFiles[type] = null;
+            updateStatusIndicator(type, false);
+            
+            // ファイル情報表示をリセット
+            const infoElement = document.getElementById(infoElementId);
+            infoElement.style.display = 'none';
+            
+            const textElement = document.getElementById(textElementId);
+            const dropZone = textElement.parentElement.parentElement;
+            dropZone.classList.remove('has-file', 'error');
 
             const formData = new FormData();
             formData.append('file', file);
@@ -777,6 +800,9 @@
                         <strong>サイズ:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB
                     `;
                     infoElement.style.display = 'block';
+                    
+                    // ステータスインジケーターを更新
+                    updateStatusIndicator(type, true);
 
                     checkUploadProgress();
 
@@ -788,6 +814,17 @@
             } catch (error) {
                 addLog(`アップロードエラー: ${error.message}`, 'error');
                 showAlert('error', `アップロード失敗: ${error.message}`);
+                
+                // エラー時はステータスをリセット
+                updateStatusIndicator(type, false);
+                uploadedFiles[type] = null;
+                
+                // エラー時の視覚的フィードバック
+                const dropZone = document.getElementById(textElementId).parentElement.parentElement;
+                dropZone.classList.add('error');
+                setTimeout(() => {
+                    dropZone.classList.remove('error');
+                }, 3000);
             }
         }
 
@@ -803,7 +840,7 @@
                 // スクロールしないでボタンの近くに表示
                 return;
             } else {
-                document.getElementById('validation-container').style.display = 'none';
+                // バリデーションコンテナはインラインなので非表示不要
             }
 
             const duration = document.getElementById('duration').value;
@@ -933,6 +970,31 @@
                 alertDiv.style.opacity = '0';
                 setTimeout(() => container.innerHTML = '', 300);
             }, 5000);
+        }
+
+        // ステータスインジケーターを更新
+        function updateStatusIndicator(type, success) {
+            let statusId;
+            switch(type) {
+                case 'image':
+                    statusId = 'image-status';
+                    break;
+                case 'backgroundVideo':
+                    statusId = 'video-status';
+                    break;
+                case 'audio':
+                    statusId = 'audio-status';
+                    break;
+            }
+            
+            const statusElement = document.getElementById(statusId);
+            if (statusElement) {
+                if (success) {
+                    statusElement.classList.add('uploaded');
+                } else {
+                    statusElement.classList.remove('uploaded');
+                }
+            }
         }
 
         // Initialize
