@@ -62,12 +62,10 @@ class VideoEditor {
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
         .input(imagePath);
         
-      // 画像を中央に配置（スケーリングはscale2refで実装）
+      // シンプルで安定したオーバーレイ設定
       ff.complexFilter([
-        // scale2refを使って画像を動画の80%幅にスケール
-        '[2:v][0:v]scale2ref=w=oh*mdar*0.8:h=ih*0.8:force_original_aspect_ratio=decrease[scaled][video]',
-        // スケールした画像を中央に配置
-        '[video][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
+        // 画像を中央に配置（スケーリングなし）
+        '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2:shortest=1[outv]'
       ]);
       
       // 出力設定

@@ -8,6 +8,13 @@ const VideoEditor = require('./video-editor');
 const app = express();
 const PORT = process.env.PORT || 3003;
 
+// タイムアウト設定を増やす（5分）
+app.use((req, res, next) => {
+  req.setTimeout(300000); // 5分
+  res.setTimeout(300000); // 5分
+  next();
+});
+
 // Renderのヘルスチェック対応
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
