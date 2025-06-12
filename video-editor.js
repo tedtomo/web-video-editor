@@ -65,12 +65,10 @@ class VideoEditor {
         // 画像オーバーレイ
         .input(imagePath)
         
-        // フィルター設定：画像を動画幅の80%にリサイズしてオーバーレイ
+        // フィルター設定：画像を中央配置でオーバーレイ（80%は一旦保留）
         .complexFilter([
-          // 画像を動画サイズに基づいてスケール（動画の80%幅、アスペクト比維持）
-          '[2:v]scale=w=trunc(main_w*0.8/2)*2:h=-2[scaled]',
-          // 動画の上に画像を中央配置でオーバーレイ
-          '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2:eval=init[outv]'
+          // 画像をオーバーレイ（中央配置）
+          '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
         ])
         
         // 出力設定
