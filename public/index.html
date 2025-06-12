@@ -35,6 +35,11 @@
             --blur-bg: saturate(180%) blur(20px);
         }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-secondary);
@@ -43,249 +48,228 @@
             font-weight: 400;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Hero gradient background */
-        .hero-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 600px;
-            background: linear-gradient(180deg, 
-                rgba(0, 113, 227, 0.02) 0%, 
-                rgba(0, 113, 227, 0) 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            position: relative;
-            z-index: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Navigation */
         .nav {
-            padding: 16px 0;
+            padding: 12px 0;
             border-bottom: 1px solid var(--border-light);
             background: var(--bg-card);
             backdrop-filter: var(--blur-bg);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-shrink: 0;
         }
 
         .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             color: var(--text-primary);
         }
 
-        /* Header */
-        .header {
-            text-align: center;
-            padding: 80px 0 60px;
-        }
-
-        .header h1 {
-            font-size: 56px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-            margin-bottom: 16px;
-            background: linear-gradient(180deg, var(--text-primary) 0%, var(--text-tertiary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header p {
-            font-size: 21px;
-            color: var(--text-secondary);
-            font-weight: 400;
-            max-width: 600px;
+        /* Main Content */
+        .main-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Left Panel - Editor */
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Right Panel - Preview */
+        .preview-panel {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
         }
 
         /* Cards */
         .card {
             background: var(--bg-card);
             backdrop-filter: var(--blur-bg);
-            border-radius: 18px;
-            padding: 48px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-medium);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-small);
             border: 1px solid var(--border-light);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card:hover {
-            box-shadow: var(--shadow-large);
-            transform: translateY(-2px);
-        }
-
-        .section-title {
-            font-size: 32px;
+        .card-title {
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 32px;
-            letter-spacing: -0.01em;
+            margin-bottom: 16px;
         }
 
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 32px;
+        /* File Upload Compact */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
         }
 
-        .form-label {
-            display: block;
-            font-size: 17px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        .required-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--accent-red);
-            border-radius: 50%;
-            margin-left: 6px;
-            vertical-align: middle;
-            transition: all 0.3s ease;
-        }
-        
-        .required-dot.uploaded {
-            background: var(--accent-green);
-        }
-
-        /* File Upload */
-        .file-upload {
+        .file-upload-compact {
             border: 2px dashed var(--border-medium);
-            border-radius: 16px;
-            padding: 48px 24px;
+            border-radius: 8px;
+            padding: 12px;
             text-align: center;
-            transition: all 0.2s ease;
             cursor: pointer;
             background: var(--bg-primary);
+            transition: all 0.2s ease;
             position: relative;
-            overflow: hidden;
         }
 
-        .file-upload:hover {
+        .file-upload-compact:hover {
             border-color: var(--accent-blue);
             background: rgba(0, 113, 227, 0.02);
         }
 
-        .file-upload.drag-over {
-            border-color: var(--accent-blue);
-            background: rgba(0, 113, 227, 0.04);
-            transform: scale(1.01);
-        }
-
-        .file-upload.has-file {
+        .file-upload-compact.has-file {
             border-color: var(--accent-green);
             border-style: solid;
             background: rgba(52, 199, 89, 0.04);
         }
 
-        .file-upload-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
+        .file-upload-compact.error {
+            border-color: var(--accent-red);
+            background: rgba(255, 59, 48, 0.04);
+        }
+
+        .upload-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot.uploaded {
+            background: var(--accent-green);
+        }
+
+        .upload-preview {
+            width: 100%;
+            height: 80px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .upload-preview img,
+        .upload-preview video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-icon {
+            font-size: 24px;
             opacity: 0.5;
         }
 
-        .file-upload-text {
-            font-size: 17px;
-            color: var(--text-primary);
+        .upload-filename {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Settings Form */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group-compact {
+            margin-bottom: 0;
+        }
+
+        .form-label-compact {
+            font-size: 12px;
             font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .file-upload-hint {
-            font-size: 15px;
             color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: block;
         }
 
-        .file-input {
-            display: none;
-        }
-
-        .file-info {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-top: 16px;
-            font-size: 15px;
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Input Fields */
-        .input-field {
+        .input-field-compact {
             width: 100%;
-            padding: 16px 20px;
+            padding: 8px 12px;
             border: 1px solid var(--border-light);
-            border-radius: 12px;
-            font-size: 17px;
+            border-radius: 6px;
+            font-size: 14px;
             background: var(--bg-primary);
             transition: all 0.2s ease;
             font-family: inherit;
-            color: var(--text-primary);
         }
 
-        .input-field:focus {
+        .input-field-compact:focus {
             outline: none;
             border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
-        }
-
-        .input-field::placeholder {
-            color: var(--text-tertiary);
+            box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.1);
         }
 
         /* Buttons */
         .btn {
             display: inline-block;
-            padding: 16px 32px;
+            padding: 10px 20px;
             background: var(--accent-blue);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 17px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: center;
             font-family: inherit;
             width: 100%;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn:hover {
             background: var(--accent-blue-hover);
             transform: translateY(-1px);
-            box-shadow: 0 8px 16px rgba(0, 113, 227, 0.2);
-        }
-
-        .btn:active {
-            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
         }
 
         .btn:disabled {
@@ -302,341 +286,308 @@
 
         .btn-secondary:hover {
             background: var(--bg-secondary);
-            box-shadow: var(--shadow-small);
         }
 
-        .btn-text {
+        /* Video Preview */
+        .video-preview-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
             position: relative;
-            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-preview-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: #666;
+        }
+
+        .video-placeholder-icon {
+            font-size: 48px;
+            opacity: 0.3;
+            margin-bottom: 8px;
+        }
+
+        /* Video List */
+        .video-list-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .video-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .video-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .video-item-icon {
+            font-size: 20px;
+        }
+
+        .video-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-item-name {
+            font-size: 12px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .video-item-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .video-item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-icon {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
         }
 
         /* Progress */
-        .progress-container {
+        .progress-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .progress-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
             text-align: center;
-            padding: 48px;
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            margin-top: 32px;
+            box-shadow: var(--shadow-large);
         }
 
         .spinner {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border: 3px solid var(--border-light);
             border-top-color: var(--accent-blue);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
+            margin: 0 auto 16px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .progress-message {
-            font-size: 19px;
-            color: var(--text-primary);
-            font-weight: 500;
-            margin-bottom: 16px;
-        }
-
-        /* Logs */
-        .log-container {
-            background: var(--text-primary);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 24px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 13px;
-            display: none;
-        }
-
-        .log-entry {
-            padding: 8px 12px;
-            margin-bottom: 4px;
-            border-radius: 6px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .log-info { background: rgba(0, 113, 227, 0.2); }
-        .log-success { background: rgba(52, 199, 89, 0.2); }
-        .log-error { background: rgba(255, 59, 48, 0.2); }
-        .log-warning { background: rgba(255, 149, 0, 0.2); }
-
         /* Alerts */
-        .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideDown 0.3s ease;
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
         }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-16px); }
-            to { opacity: 1; transform: translateY(0); }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow-medium);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
 
         .alert-success {
-            background: rgba(52, 199, 89, 0.1);
-            color: var(--accent-green);
+            background: var(--accent-green);
+            color: white;
         }
 
         .alert-error {
-            background: rgba(255, 59, 48, 0.1);
-            color: var(--accent-red);
+            background: var(--accent-red);
+            color: white;
         }
 
-        .alert-warning {
-            background: rgba(255, 149, 0, 0.1);
-            color: var(--accent-orange);
+        /* File input hidden */
+        .file-input {
+            display: none;
         }
 
-        .alert-info {
-            background: rgba(0, 113, 227, 0.1);
-            color: var(--accent-blue);
-        }
-
-        /* Video Grid */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
-        }
-
-        .video-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 24px;
-            transition: all 0.2s ease;
-        }
-
-        .video-card:hover {
-            box-shadow: var(--shadow-medium);
-            transform: translateY(-2px);
-        }
-
-        .video-preview {
-            width: 100%;
-            height: 180px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .video-title {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .video-info {
-            font-size: 15px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        /* Inline Validation */
-        .validation-inline {
-            margin-bottom: 12px;
-            text-align: center;
-        }
-        
+        /* Validation */
         .validation-text {
+            font-size: 12px;
             color: var(--accent-red);
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        /* Upload Error */
-        .file-upload.error {
-            border-color: var(--accent-red);
-            background: rgba(255, 59, 48, 0.04);
-        }
-
-        /* Removed old validation styles */
-
-        /* Layout */
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 40px;
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
             }
             
-            .header p {
-                font-size: 19px;
+            .preview-panel {
+                width: 100%;
             }
-            
-            .card {
-                padding: 32px 24px;
-            }
-            
-            .two-column {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
-    <div class="hero-gradient"></div>
-    
     <!-- Navigation -->
     <nav class="nav">
-        <div class="container">
-            <div class="nav-content">
-                <div class="logo">動画エディター</div>
-            </div>
+        <div class="nav-content">
+            <div class="logo">動画エディター</div>
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>動画作成</h1>
-            <p>画像、動画、音声を組み合わせてコンテンツを作成</p>
+    <!-- Alert Container -->
+    <div class="alert-container" id="alert-container"></div>
+
+    <!-- Progress Overlay -->
+    <div class="progress-overlay" id="progress-overlay">
+        <div class="progress-modal">
+            <div class="spinner"></div>
+            <div id="progress-message">動画を作成しています...</div>
         </div>
+    </div>
 
-        <div id="alert-container"></div>
-
-        <!-- Validation Message moved to form -->
-
-        <!-- Main Editor -->
-        <div class="card">
-            <h2 class="section-title">動画を作成</h2>
-            
-            <form id="video-edit-form">
-                <div class="two-column">
-                    <!-- File Uploads -->
-                    <div>
-                        <div class="form-group">
-                            <label class="form-label">
-                                オーバーレイ画像
-                                <span class="required-dot" id="image-status"></span>
-                            </label>
-                            <div class="file-upload drop-zone" id="image-drop-zone">
-                                <span class="file-upload-icon">🖼</span>
-                                <div class="file-upload-text" id="overlay-image-text">ここに画像をドロップまたはクリックして選択</div>
-                                <div class="file-upload-hint">対応形式: JPG, PNG, GIF</div>
-                                <input type="file" id="overlay-image" class="file-input" accept="image/*">
-                            </div>
-                            <div id="overlay-image-info" class="file-info"></div>
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <!-- File Upload Section -->
+            <div class="card">
+                <h3 class="card-title">素材ファイル</h3>
+                <div class="upload-grid">
+                    <!-- Image Upload -->
+                    <div class="file-upload-compact" id="image-drop-zone">
+                        <div class="upload-label">
+                            画像
+                            <span class="status-dot" id="image-status"></span>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                背景動画
-                                <span class="required-dot" id="video-status"></span>
-                            </label>
-                            <div class="file-upload drop-zone" id="video-drop-zone">
-                                <span class="file-upload-icon">🎥</span>
-                                <div class="file-upload-text" id="background-video-text">ここに動画をドロップまたはクリックして選択</div>
-                                <div class="file-upload-hint">対応形式: MP4, MOV, AVI, WebM</div>
-                                <input type="file" id="background-video" class="file-input" accept="video/*">
-                            </div>
-                            <div id="background-video-info" class="file-info"></div>
+                        <div class="upload-preview" id="image-preview">
+                            <span class="upload-icon">🖼️</span>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                音声ファイル
-                                <span class="required-dot" id="audio-status"></span>
-                            </label>
-                            <div class="file-upload drop-zone" id="audio-drop-zone">
-                                <span class="file-upload-icon">🎵</span>
-                                <div class="file-upload-text" id="audio-file-text">ここに音声をドロップまたはクリックして選択</div>
-                                <div class="file-upload-hint">対応形式: MP3, WAV, M4A, AAC, OGG</div>
-                                <input type="file" id="audio-file" class="file-input" accept="audio/*,video/*">
-                            </div>
-                            <div id="audio-file-info" class="file-info"></div>
-                        </div>
+                        <div class="upload-filename" id="image-filename">選択してください</div>
+                        <input type="file" id="overlay-image" class="file-input" accept="image/*">
                     </div>
 
-                    <!-- Settings -->
-                    <div>
-                        <div class="form-group">
-                            <label class="form-label" for="duration">動画の長さ（秒）</label>
-                            <input type="number" id="duration" class="input-field" value="20" min="1" max="120" required>
+                    <!-- Video Upload -->
+                    <div class="file-upload-compact" id="video-drop-zone">
+                        <div class="upload-label">
+                            動画
+                            <span class="status-dot" id="video-status"></span>
                         </div>
+                        <div class="upload-preview" id="video-preview">
+                            <span class="upload-icon">🎥</span>
+                        </div>
+                        <div class="upload-filename" id="video-filename">選択してください</div>
+                        <input type="file" id="background-video" class="file-input" accept="video/*">
+                    </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="video-start">動画開始時間</label>
-                            <input type="text" id="video-start" class="input-field" value="0:00" placeholder="0:00">
+                    <!-- Audio Upload -->
+                    <div class="file-upload-compact" id="audio-drop-zone">
+                        <div class="upload-label">
+                            音声
+                            <span class="status-dot" id="audio-status"></span>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="audio-start">音声開始時間</label>
-                            <input type="text" id="audio-start" class="input-field" value="0:00" placeholder="0:00">
+                        <div class="upload-preview" id="audio-preview">
+                            <span class="upload-icon">🎵</span>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="output-name">出力ファイル名</label>
-                            <input type="text" id="output-name" class="input-field" placeholder="my_video.mp4">
-                        </div>
-
-                        <!-- Inline validation message -->
-                        <div id="validation-container" class="validation-inline" style="display: none;">
-                            <small class="validation-text">※ 必要なファイルを選択してください</small>
-                        </div>
-                        
-                        <button type="submit" class="btn" id="edit-btn">
-                            <span class="btn-text" id="edit-btn-text">動画を作成</span>
-                        </button>
+                        <div class="upload-filename" id="audio-filename">選択してください</div>
+                        <input type="file" id="audio-file" class="file-input" accept="audio/*,video/*">
                     </div>
                 </div>
-            </form>
+            </div>
 
-            <div id="progress-container" class="progress-container">
-                <div class="spinner"></div>
-                <div class="progress-message" id="progress-message">動画を作成しています...</div>
-                <div id="log-container" class="log-container"></div>
+            <!-- Settings Section -->
+            <div class="card">
+                <h3 class="card-title">編集設定</h3>
+                <form id="video-edit-form">
+                    <div class="settings-grid">
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="duration">動画の長さ（秒）</label>
+                            <input type="number" id="duration" class="input-field-compact" value="20" min="1" max="120">
+                        </div>
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="output-name">出力ファイル名</label>
+                            <input type="text" id="output-name" class="input-field-compact" placeholder="my_video.mp4">
+                        </div>
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="video-start">動画開始時間</label>
+                            <input type="text" id="video-start" class="input-field-compact" value="0:00" placeholder="0:00">
+                        </div>
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="audio-start">音声開始時間</label>
+                            <input type="text" id="audio-start" class="input-field-compact" value="0:00" placeholder="0:00">
+                        </div>
+                    </div>
+                    <div class="validation-text" id="validation-text">※ すべてのファイルを選択してください</div>
+                    <button type="submit" class="btn" id="edit-btn" style="margin-top: 16px;">
+                        <span id="edit-btn-text">動画を作成</span>
+                    </button>
+                </form>
             </div>
         </div>
 
-        <!-- Video Library -->
-        <div class="card">
-            <h2 class="section-title">作成した動画</h2>
-            <button class="btn btn-secondary" onclick="loadVideos()">更新</button>
-            <div id="video-list" class="video-grid"></div>
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <!-- Current Video Preview -->
+            <div class="card">
+                <h3 class="card-title">プレビュー</h3>
+                <div class="video-preview-container" id="current-preview">
+                    <div class="video-placeholder">
+                        <div class="video-placeholder-icon">🎬</div>
+                        <div>動画を作成するとここに表示されます</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video List -->
+            <div class="card">
+                <h3 class="card-title">作成した動画</h3>
+                <div class="video-list-compact" id="video-list">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                        まだ動画がありません
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -647,135 +598,76 @@
             audio: null
         };
 
-        // Validation
-        function validateFiles() {
-            const imageValid = !!uploadedFiles.image;
-            const videoValid = !!uploadedFiles.backgroundVideo;
-            const audioValid = !!uploadedFiles.audio;
-            
-            const allValid = imageValid && videoValid && audioValid;
-            
-            // ボタンの有効/無効を切り替え
-            const editBtn = document.getElementById('edit-btn');
-            if (editBtn) {
-                // ボタンを常に有効にして、クリック時にバリデーション
-                editBtn.disabled = false;
-            }
-            
-            return allValid;
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadVideos();
+        });
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            // File upload zones
+            setupDropZone('image-drop-zone', 'overlay-image');
+            setupDropZone('video-drop-zone', 'background-video');
+            setupDropZone('audio-drop-zone', 'audio-file');
+
+            // File input changes
+            document.getElementById('overlay-image').addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFileUpload(e.target.files[0], 'image');
+            });
+            document.getElementById('background-video').addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFileUpload(e.target.files[0], 'backgroundVideo');
+            });
+            document.getElementById('audio-file').addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFileUpload(e.target.files[0], 'audio');
+            });
+
+            // Form submission
+            document.getElementById('video-edit-form').addEventListener('submit', handleFormSubmit);
         }
 
-        // Upload progress
-        function checkUploadProgress() {
-            const totalFiles = 3;
-            const uploadedCount = Object.values(uploadedFiles).filter(f => f !== null).length;
-            
-            if (uploadedCount === totalFiles) {
-                setTimeout(() => {
-                    showAlert('success', 'すべてのファイルがアップロードされました。');
-                }, 300);
-                // Validation container is now inline
-            }
-            
-            validateFiles();
-        }
-
-        // Logging
-        function addLog(message, type = 'info') {
-            const logContainer = document.getElementById('log-container');
-            logContainer.style.display = 'block';
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry log-${type}`;
-            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            
-            logContainer.appendChild(logEntry);
-            logContainer.scrollTop = logContainer.scrollHeight;
-        }
-
-        function clearLogs() {
-            const logContainer = document.getElementById('log-container');
-            logContainer.innerHTML = '';
-            logContainer.style.display = 'none';
-        }
-
-        // Drag and drop
-        function setupDragAndDrop(dropZoneId, inputId) {
-            const dropZone = document.getElementById(dropZoneId);
+        // Setup drag and drop
+        function setupDropZone(zoneId, inputId) {
+            const zone = document.getElementById(zoneId);
             const input = document.getElementById(inputId);
 
-            dropZone.addEventListener('click', (e) => {
+            zone.addEventListener('click', (e) => {
                 if (e.target.tagName !== 'INPUT') {
                     input.click();
                 }
             });
 
-            dropZone.addEventListener('dragover', (e) => {
+            zone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                dropZone.classList.add('drag-over');
+                zone.style.borderColor = 'var(--accent-blue)';
             });
 
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('drag-over');
+            zone.addEventListener('dragleave', () => {
+                zone.style.borderColor = '';
             });
 
-            dropZone.addEventListener('drop', (e) => {
+            zone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropZone.classList.remove('drag-over');
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    input.files = files;
+                zone.style.borderColor = '';
+                if (e.dataTransfer.files.length > 0) {
+                    input.files = e.dataTransfer.files;
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
         }
 
-        // Initialize drag and drop
-        setupDragAndDrop('image-drop-zone', 'overlay-image');
-        setupDragAndDrop('video-drop-zone', 'background-video');
-        setupDragAndDrop('audio-drop-zone', 'audio-file');
-
-        // File upload handlers
-        document.getElementById('background-video').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                handleFileUpload(e.target.files[0], 'backgroundVideo', 'background-video-text', 'background-video-info');
-            }
-        });
-
-        document.getElementById('overlay-image').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                handleFileUpload(e.target.files[0], 'image', 'overlay-image-text', 'overlay-image-info');
-            }
-        });
-
-        document.getElementById('audio-file').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                handleFileUpload(e.target.files[0], 'audio', 'audio-file-text', 'audio-file-info');
-            }
-        });
-
-        async function handleFileUpload(file, type, textElementId, infoElementId) {
+        // Handle file upload
+        async function handleFileUpload(file, type) {
             if (!file) return;
-            
-            // 既存のファイル情報をクリア
+
+            // Reset previous state
             uploadedFiles[type] = null;
             updateStatusIndicator(type, false);
-            
-            // ファイル情報表示をリセット
-            const infoElement = document.getElementById(infoElementId);
-            infoElement.style.display = 'none';
-            
-            const textElement = document.getElementById(textElementId);
-            const dropZone = textElement.parentElement.parentElement;
-            dropZone.classList.remove('has-file', 'error');
 
             const formData = new FormData();
             formData.append('file', file);
 
             try {
-                addLog(`${file.name} をアップロード中...`, 'info');
-
                 const response = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
@@ -789,136 +681,162 @@
 
                 if (result.success) {
                     uploadedFiles[type] = result.filename;
-                    
-                    const textElement = document.getElementById(textElementId);
-                    textElement.textContent = result.originalName;
-                    textElement.parentElement.parentElement.classList.add('has-file');
-                    
-                    const infoElement = document.getElementById(infoElementId);
-                    infoElement.innerHTML = `
-                        <strong>ファイル名:</strong> ${result.originalName}<br>
-                        <strong>サイズ:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB
-                    `;
-                    infoElement.style.display = 'block';
-                    
-                    // ステータスインジケーターを更新
                     updateStatusIndicator(type, true);
-
-                    checkUploadProgress();
-
-                    addLog(`${result.originalName} のアップロードが完了しました`, 'success');
+                    updatePreview(type, file, result.url);
+                    updateFilename(type, result.originalName);
+                    showAlert('success', `${result.originalName} をアップロードしました`);
                 } else {
                     throw new Error(result.error);
                 }
-
             } catch (error) {
-                addLog(`アップロードエラー: ${error.message}`, 'error');
-                showAlert('error', `アップロード失敗: ${error.message}`);
-                
-                // エラー時はステータスをリセット
+                showAlert('error', `アップロードエラー: ${error.message}`);
                 updateStatusIndicator(type, false);
-                uploadedFiles[type] = null;
-                
-                // エラー時の視覚的フィードバック
-                const dropZone = document.getElementById(textElementId).parentElement.parentElement;
-                dropZone.classList.add('error');
-                setTimeout(() => {
-                    dropZone.classList.remove('error');
-                }, 3000);
             }
         }
 
-        // Form submission
-        document.getElementById('video-edit-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // Update status indicator
+        function updateStatusIndicator(type, success) {
+            const statusMap = {
+                'image': 'image-status',
+                'backgroundVideo': 'video-status',
+                'audio': 'audio-status'
+            };
             
-            clearLogs();
-            addLog('動画作成を開始します...', 'info');
-
-            if (!validateFiles()) {
-                document.getElementById('validation-container').style.display = 'block';
-                // スクロールしないでボタンの近くに表示
-                return;
-            } else {
-                // バリデーションコンテナはインラインなので非表示不要
+            const element = document.getElementById(statusMap[type]);
+            if (element) {
+                if (success) {
+                    element.classList.add('uploaded');
+                } else {
+                    element.classList.remove('uploaded');
+                }
             }
 
-            const duration = document.getElementById('duration').value;
-            const videoStart = document.getElementById('video-start').value;
-            const audioStart = document.getElementById('audio-start').value;
-            const outputName = document.getElementById('output-name').value || `video_${Date.now()}.mp4`;
+            // Update zone style
+            const zoneMap = {
+                'image': 'image-drop-zone',
+                'backgroundVideo': 'video-drop-zone',
+                'audio': 'audio-drop-zone'
+            };
+            
+            const zone = document.getElementById(zoneMap[type]);
+            if (zone) {
+                if (success) {
+                    zone.classList.add('has-file');
+                    zone.classList.remove('error');
+                } else {
+                    zone.classList.remove('has-file');
+                }
+            }
+        }
 
-            // Update UI
+        // Update preview
+        function updatePreview(type, file, url) {
+            const previewMap = {
+                'image': 'image-preview',
+                'backgroundVideo': 'video-preview',
+                'audio': 'audio-preview'
+            };
+
+            const previewElement = document.getElementById(previewMap[type]);
+            if (!previewElement) return;
+
+            if (type === 'image') {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                previewElement.innerHTML = '';
+                previewElement.appendChild(img);
+            } else if (type === 'backgroundVideo') {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.muted = true;
+                previewElement.innerHTML = '';
+                previewElement.appendChild(video);
+            } else if (type === 'audio') {
+                previewElement.innerHTML = '<span class="upload-icon">🎵✓</span>';
+            }
+        }
+
+        // Update filename display
+        function updateFilename(type, filename) {
+            const filenameMap = {
+                'image': 'image-filename',
+                'backgroundVideo': 'video-filename',
+                'audio': 'audio-filename'
+            };
+
+            const element = document.getElementById(filenameMap[type]);
+            if (element) {
+                element.textContent = filename;
+                element.title = filename;
+            }
+        }
+
+        // Handle form submission
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            // Validate
+            if (!uploadedFiles.image || !uploadedFiles.backgroundVideo || !uploadedFiles.audio) {
+                document.getElementById('validation-text').style.display = 'block';
+                showAlert('error', 'すべてのファイルを選択してください');
+                return;
+            }
+
+            document.getElementById('validation-text').style.display = 'none';
+
             const editBtn = document.getElementById('edit-btn');
             const editBtnText = document.getElementById('edit-btn-text');
             editBtn.disabled = true;
             editBtnText.textContent = '作成中...';
-            editBtn.style.opacity = '0.7';
-            
-            document.getElementById('progress-container').style.display = 'block';
-            document.getElementById('progress-message').textContent = '動画を作成しています...';
-            
-            // スクロールして進行状況を表示
-            document.getElementById('progress-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            addLog(`長さ: ${duration}秒, 動画開始: ${videoStart}, 音声開始: ${audioStart}`, 'info');
-            addLog(`ファイル: 背景=${uploadedFiles.backgroundVideo}, 画像=${uploadedFiles.image}, 音声=${uploadedFiles.audio}`, 'info');
+            // Show progress
+            document.getElementById('progress-overlay').style.display = 'flex';
+
+            const requestData = {
+                backgroundVideoFile: uploadedFiles.backgroundVideo,
+                imageFile: uploadedFiles.image,
+                audioFile: uploadedFiles.audio,
+                duration: document.getElementById('duration').value,
+                videoStart: document.getElementById('video-start').value,
+                audioStart: document.getElementById('audio-start').value,
+                outputName: document.getElementById('output-name').value || `video_${Date.now()}.mp4`
+            };
 
             try {
-                addLog('サーバーにリクエスト送信中...', 'info');
-                
-                const requestData = {
-                    backgroundVideoFile: uploadedFiles.backgroundVideo,
-                    imageFile: uploadedFiles.image,
-                    audioFile: uploadedFiles.audio,
-                    duration: duration,
-                    videoStart: videoStart,
-                    audioStart: audioStart,
-                    outputName: outputName
-                };
-                
-                console.log('リクエストデータ:', requestData);
                 const response = await fetch('/api/edit-video', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestData)
                 });
 
                 const result = await response.json();
-                console.log('サーバーレスポンス:', result);
 
                 if (result.success) {
-                    addLog(`動画が作成されました: ${result.outputFile}`, 'success');
-                    document.getElementById('progress-message').textContent = '動画の作成が完了しました！';
-                    showAlert('success', '動画の準備ができました！');
+                    showAlert('success', '動画が作成されました！');
                     loadVideos();
-                    
-                    setTimeout(() => {
-                        document.getElementById('progress-container').style.display = 'none';
-                    }, 2000);
+                    // Set current preview
+                    setCurrentPreview(result.outputUrl);
                 } else {
-                    console.error('サーバーエラー:', result);
                     throw new Error(result.error || '不明なエラー');
                 }
-
             } catch (error) {
-                console.error('動画作成エラー:', error);
-                addLog(`エラー: ${error.message}`, 'error');
-                document.getElementById('progress-message').textContent = '作成に失敗しました';
                 showAlert('error', `エラー: ${error.message}`);
-                
-                // エラー時は3秒後に進行状況を非表示
-                setTimeout(() => {
-                    document.getElementById('progress-container').style.display = 'none';
-                }, 3000);
             } finally {
                 editBtn.disabled = false;
                 editBtnText.textContent = '動画を作成';
-                editBtn.style.opacity = '1';
+                document.getElementById('progress-overlay').style.display = 'none';
             }
-        });
+        }
+
+        // Set current preview
+        function setCurrentPreview(url) {
+            const previewContainer = document.getElementById('current-preview');
+            const video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            previewContainer.innerHTML = '';
+            previewContainer.appendChild(video);
+        }
 
         // Load videos
         async function loadVideos() {
@@ -929,26 +847,36 @@
                 const videoList = document.getElementById('video-list');
 
                 if (videos.length === 0) {
-                    videoList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1; padding: 48px 0;">まだ動画がありません。上のフォームから最初の動画を作成してください。</p>';
+                    videoList.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">まだ動画がありません</div>';
                     return;
                 }
 
                 videoList.innerHTML = videos.map(video => `
-                    <div class="video-card">
-                        <div class="video-preview">🎬</div>
-                        <div class="video-title">${video.filename}</div>
-                        <div class="video-info">
-                            ${video.size} MB • ${new Date(video.created).toLocaleDateString()}
+                    <div class="video-item">
+                        <span class="video-item-icon">🎬</span>
+                        <div class="video-item-info">
+                            <div class="video-item-name">${video.filename}</div>
+                            <div class="video-item-meta">${video.size} MB</div>
                         </div>
-                        <button class="btn btn-secondary" onclick="downloadVideo('${video.url}', '${video.filename}')">
-                            ダウンロード
-                        </button>
+                        <div class="video-item-actions">
+                            <button class="btn btn-secondary btn-icon" onclick="previewVideo('${video.url}')">👁️</button>
+                            <button class="btn btn-secondary btn-icon" onclick="downloadVideo('${video.url}', '${video.filename}')">⬇️</button>
+                        </div>
                     </div>
                 `).join('');
 
+                // Auto-preview the latest video
+                if (videos.length > 0) {
+                    setCurrentPreview(videos[0].url);
+                }
             } catch (error) {
-                showAlert('error', `動画の読み込み失敗: ${error.message}`);
+                console.error('動画リスト取得エラー:', error);
             }
+        }
+
+        // Preview video
+        function previewVideo(url) {
+            setCurrentPreview(url);
         }
 
         // Download video
@@ -961,52 +889,20 @@
             document.body.removeChild(link);
         }
 
-        // Alerts
+        // Show alert
         function showAlert(type, message) {
             const container = document.getElementById('alert-container');
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
             
-            container.innerHTML = '';
-            container.appendChild(alertDiv);
+            container.appendChild(alert);
 
             setTimeout(() => {
-                alertDiv.style.opacity = '0';
-                setTimeout(() => container.innerHTML = '', 300);
-            }, 5000);
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
         }
-
-        // ステータスインジケーターを更新
-        function updateStatusIndicator(type, success) {
-            let statusId;
-            switch(type) {
-                case 'image':
-                    statusId = 'image-status';
-                    break;
-                case 'backgroundVideo':
-                    statusId = 'video-status';
-                    break;
-                case 'audio':
-                    statusId = 'audio-status';
-                    break;
-            }
-            
-            const statusElement = document.getElementById(statusId);
-            if (statusElement) {
-                if (success) {
-                    statusElement.classList.add('uploaded');
-                } else {
-                    statusElement.classList.remove('uploaded');
-                }
-            }
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadVideos();
-            validateFiles();
-        });
     </script>
 </body>
 </html>
