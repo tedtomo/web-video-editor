@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 Web Video Editor</title>
+    <title>🎬 Web Video Editor - Premium</title>
     <style>
         * {
             margin: 0;
@@ -11,11 +11,48 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --border: #e2e8f0;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Premium Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(1deg); }
+            66% { transform: translate(-20px, 20px) rotate(-1deg); }
         }
 
         .container {
@@ -27,21 +64,48 @@
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            padding-top: 20px;
         }
 
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
+            font-weight: 800;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            font-weight: 300;
         }
 
         .card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 40px;
             margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .form-section {
@@ -49,48 +113,92 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: #555;
+            color: var(--dark);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
         .file-upload {
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 20px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 30px 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            background: #f9f9f9;
+            transition: all 0.3s ease;
+            background: var(--light);
             position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
         }
 
         .file-upload:hover {
-            border-color: #667eea;
-            background: #f5f7ff;
+            border-color: var(--primary);
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .file-upload:hover::before {
+            opacity: 0.05;
+        }
+
+        .file-upload span {
+            position: relative;
+            z-index: 1;
+            font-size: 0.95rem;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-upload .icon {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
         }
 
         .file-upload.has-file {
-            border-color: #28a745;
-            background: #f8fff9;
+            border-color: var(--success);
+            background: #f0fdf4;
             border-style: solid;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+            animation: successPulse 0.5s ease;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .file-upload.has-file span {
-            color: #28a745;
+            color: var(--success);
             font-weight: 600;
         }
 
         .file-upload.drag-over {
-            border-color: #667eea;
-            background: #e8ecff;
+            border-color: var(--primary);
+            background: #eef2ff;
             transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
         }
 
         .file-input {
@@ -99,97 +207,150 @@
 
         .input-field {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: var(--light);
+            font-weight: 500;
         }
 
         .input-field:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: white;
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
+            padding: 16px 32px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
             width: 100%;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
         }
 
         .btn:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
         }
 
         .progress-container {
             display: none;
             text-align: center;
-            padding: 30px;
+            padding: 40px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 12px;
+            margin-top: 20px;
         }
 
         .log-container {
             margin-top: 20px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
+            background: var(--dark);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 20px;
             max-height: 200px;
             overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
             display: none;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
         }
 
-        .log-entry {
-            margin-bottom: 5px;
-            padding: 5px;
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: #475569;
             border-radius: 4px;
         }
 
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
         .log-info {
-            color: #004085;
-            background: #cce5ff;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
         }
 
         .log-success {
-            color: #155724;
-            background: #d4edda;
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #22c55e;
         }
 
         .log-error {
-            color: #721c24;
-            background: #f8d7da;
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
         }
 
         .log-warning {
-            color: #856404;
-            background: #fff3cd;
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #f59e0b;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin: 0 auto 25px;
         }
 
         @keyframes spin {
@@ -198,11 +359,16 @@
         }
 
         .alert {
-            padding: 15px;
-            border-radius: 8px;
+            padding: 16px 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
             display: none;
             animation: slideInDown 0.3s ease-out;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         @keyframes slideInDown {
@@ -217,58 +383,97 @@
         }
 
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
         }
 
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border: 1px solid #93c5fd;
         }
 
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
 
         .video-card {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 20px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
             text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .video-preview {
             width: 100%;
             height: 180px;
-            background: #e9ecef;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
-            color: #6c757d;
-            margin-bottom: 15px;
+            color: #9ca3af;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-preview::after {
+            content: '▶';
+            position: absolute;
+            font-size: 2rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
         }
 
         .video-info {
             font-size: 14px;
-            color: #6c757d;
-            margin-bottom: 15px;
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
 
         .file-info {
-            background: #e3f2fd;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 12px;
             font-size: 14px;
             animation: slideIn 0.3s ease-out;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
         }
 
         @keyframes slideIn {
@@ -302,12 +507,93 @@
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 30px;
+        }
+
+        .required-badge {
+            background: var(--error);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .file-validation-error {
+            display: none;
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: 500;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .validation-container {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideInDown 0.3s ease-out;
+        }
+
+        .validation-container h3 {
+            color: var(--error);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .validation-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .validation-list li {
+            padding: 8px 0;
+            color: #991b1b;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .validation-list li::before {
+            content: '❌';
+            font-size: 0.85rem;
+        }
+
+        .validation-list li.valid::before {
+            content: '✅';
+        }
+
+        .validation-list li.valid {
+            color: var(--success);
         }
 
         @media (max-width: 768px) {
             .two-column {
                 grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 25px 20px;
             }
         }
     </style>
@@ -316,10 +602,20 @@
     <div class="container">
         <div class="header">
             <h1>🎬 Web Video Editor</h1>
-            <p>動画・画像・音声を合成して新しい動画を作成</p>
+            <p>プロフェッショナルな動画編集をブラウザで簡単に</p>
         </div>
 
         <div id="alert-container"></div>
+
+        <!-- バリデーションメッセージ -->
+        <div id="validation-container" class="validation-container">
+            <h3>⚠️ 必要なファイルを選択してください</h3>
+            <ul class="validation-list" id="validation-list">
+                <li id="val-image">画像ファイル（オーバーレイ用）</li>
+                <li id="val-video">動画ファイル（背景用）</li>
+                <li id="val-audio">音声ファイル（BGM用）</li>
+            </ul>
+        </div>
 
         <!-- 動画編集フォーム -->
         <div class="card">
@@ -330,57 +626,81 @@
                     <!-- ファイルアップロード -->
                     <div>
                         <div class="form-group">
-                            <label>🖼️ オーバーレイ画像</label>
-                            <div class="file-upload drop-zone" id="image-drop-zone" onclick="document.getElementById('overlay-image').click()">
-                                <span id="overlay-image-text">📷 クリックまたはドラッグ&ドロップで画像を選択</span>
-                                <input type="file" id="overlay-image" class="file-input" accept="image/*" required>
+                            <label>
+                                オーバーレイ画像
+                                <span class="required-badge">必須</span>
+                            </label>
+                            <div class="file-upload drop-zone" id="image-drop-zone">
+                                <span id="overlay-image-text">
+                                    <span class="icon">🖼️</span>
+                                    <span>クリックまたはドラッグ&ドロップで画像を選択</span>
+                                    <small style="color: #94a3b8; font-size: 12px;">対応形式: JPG, PNG, GIF</small>
+                                </span>
+                                <input type="file" id="overlay-image" class="file-input" accept="image/*">
                             </div>
                             <div id="overlay-image-info" class="file-info" style="display: none;"></div>
+                            <div id="image-error" class="file-validation-error"></div>
                         </div>
 
                         <div class="form-group">
-                            <label>🎥 背景動画</label>
-                            <div class="file-upload drop-zone" id="video-drop-zone" onclick="document.getElementById('background-video').click()">
-                                <span id="background-video-text">🎬 クリックまたはドラッグ&ドロップで動画を選択</span>
-                                <input type="file" id="background-video" class="file-input" accept="video/*" required>
+                            <label>
+                                背景動画
+                                <span class="required-badge">必須</span>
+                            </label>
+                            <div class="file-upload drop-zone" id="video-drop-zone">
+                                <span id="background-video-text">
+                                    <span class="icon">🎥</span>
+                                    <span>クリックまたはドラッグ&ドロップで動画を選択</span>
+                                    <small style="color: #94a3b8; font-size: 12px;">対応形式: MP4, MOV, AVI, WebM</small>
+                                </span>
+                                <input type="file" id="background-video" class="file-input" accept="video/*">
                             </div>
                             <div id="background-video-info" class="file-info" style="display: none;"></div>
+                            <div id="video-error" class="file-validation-error"></div>
                         </div>
 
                         <div class="form-group">
-                            <label>🎵 音声ファイル</label>
+                            <label>
+                                音声ファイル
+                                <span class="required-badge">必須</span>
+                            </label>
                             <div class="file-upload drop-zone" id="audio-drop-zone">
-                                <span id="audio-file-text">🎵 クリックまたはドラッグ&ドロップで音声を選択</span>
-                                <input type="file" id="audio-file" class="file-input" accept="audio/*,video/*" required>
+                                <span id="audio-file-text">
+                                    <span class="icon">🎵</span>
+                                    <span>クリックまたはドラッグ&ドロップで音声を選択</span>
+                                    <small style="color: #94a3b8; font-size: 12px;">対応形式: MP3, WAV, M4A, AAC, OGG</small>
+                                </span>
+                                <input type="file" id="audio-file" class="file-input" accept="audio/*,video/*">
                             </div>
                             <div id="audio-file-info" class="file-info" style="display: none;"></div>
+                            <div id="audio-error" class="file-validation-error"></div>
                         </div>
                     </div>
 
                     <!-- 設定パラメータ -->
                     <div>
                         <div class="form-group">
-                            <label for="duration">⏱️ 動画の長さ (秒)</label>
+                            <label for="duration">動画の長さ (秒)</label>
                             <input type="number" id="duration" class="input-field" value="20" min="1" max="120" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="video-start">🎬 背景動画の開始時間 (MM:SS)</label>
+                            <label for="video-start">背景動画の開始時間 (MM:SS)</label>
                             <input type="text" id="video-start" class="input-field" value="0:00" placeholder="0:00">
                         </div>
 
                         <div class="form-group">
-                            <label for="audio-start">🎵 音声の開始時間 (MM:SS)</label>
+                            <label for="audio-start">音声の開始時間 (MM:SS)</label>
                             <input type="text" id="audio-start" class="input-field" value="0:00" placeholder="0:00">
                         </div>
 
                         <div class="form-group">
-                            <label for="output-name">📁 出力ファイル名</label>
+                            <label for="output-name">出力ファイル名</label>
                             <input type="text" id="output-name" class="input-field" placeholder="my_video.mp4">
                         </div>
 
                         <button type="submit" class="btn" id="edit-btn">
-                            <span id="edit-btn-text">🎬 動画編集開始</span>
+                            <span id="edit-btn-text">動画編集開始</span>
                         </button>
                     </div>
                 </div>
@@ -396,7 +716,7 @@
         <!-- 出力動画一覧 -->
         <div class="card">
             <h2>📹 作成済み動画</h2>
-            <button class="btn btn-secondary" onclick="loadVideos()">🔄 リスト更新</button>
+            <button class="btn btn-secondary" onclick="loadVideos()">リスト更新</button>
             <div id="video-list" class="video-grid"></div>
         </div>
     </div>
@@ -408,19 +728,41 @@
             audio: null
         };
 
+        // バリデーションチェック
+        function validateFiles() {
+            const validationContainer = document.getElementById('validation-container');
+            const imageValid = !!uploadedFiles.image;
+            const videoValid = !!uploadedFiles.backgroundVideo;
+            const audioValid = !!uploadedFiles.audio;
+            
+            document.getElementById('val-image').className = imageValid ? 'valid' : '';
+            document.getElementById('val-video').className = videoValid ? 'valid' : '';
+            document.getElementById('val-audio').className = audioValid ? 'valid' : '';
+            
+            const allValid = imageValid && videoValid && audioValid;
+            
+            if (!allValid) {
+                validationContainer.style.display = 'block';
+            } else {
+                validationContainer.style.display = 'none';
+            }
+            
+            return allValid;
+        }
+
         // 全体のアップロード進捗をチェック
         function checkUploadProgress() {
             const totalFiles = 3;
             const uploadedCount = Object.values(uploadedFiles).filter(f => f !== null).length;
             
-            // プログレスバーを表示（後で実装可能）
-            const progressPercent = (uploadedCount / totalFiles) * 100;
-            
             if (uploadedCount === totalFiles) {
                 setTimeout(() => {
                     showAlert('success', '✨ すべてのファイルがアップロードされました！編集を開始できます。');
                 }, 500);
+                document.getElementById('validation-container').style.display = 'none';
             }
+            
+            validateFiles();
         }
 
         // ログ機能
@@ -498,6 +840,20 @@
             }
         });
 
+        // 画像ファイルのクリックイベント
+        document.getElementById('image-drop-zone').addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT') {
+                document.getElementById('overlay-image').click();
+            }
+        });
+
+        // 動画ファイルのクリックイベント
+        document.getElementById('video-drop-zone').addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT') {
+                document.getElementById('background-video').click();
+            }
+        });
+
         // ファイルアップロード処理
         document.getElementById('background-video').addEventListener('change', function(e) {
             if (e.target.files[0]) {
@@ -532,6 +888,12 @@
                     body: formData
                 });
 
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error('Response:', text);
+                    throw new Error(`アップロードエラー: ${response.status}`);
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
@@ -550,7 +912,7 @@
                     infoElement.innerHTML = `
                         <strong>📁 ファイル名:</strong> ${result.originalName}<br>
                         <strong>📊 サイズ:</strong> ${(result.size / (1024 * 1024)).toFixed(2)} MB<br>
-                        <strong>📍 状態:</strong> <span style="color: #28a745;">アップロード完了</span>
+                        <strong>📍 状態:</strong> <span style="color: var(--success); font-weight: 600;">アップロード完了</span>
                     `;
                     infoElement.style.display = 'block';
 
@@ -565,6 +927,7 @@
                 }
 
             } catch (error) {
+                console.error('Upload error:', error);
                 addLog(`アップロードエラー: ${error.message}`, 'error');
                 showAlert('error', `アップロードエラー: ${error.message}`);
             }
@@ -578,15 +941,23 @@
             addLog('動画編集を開始します...', 'info');
 
             // バリデーション
-            if (!uploadedFiles.backgroundVideo || !uploadedFiles.image || !uploadedFiles.audio) {
+            if (!validateFiles()) {
                 const missing = [];
                 if (!uploadedFiles.image) missing.push('画像');
                 if (!uploadedFiles.backgroundVideo) missing.push('動画');
                 if (!uploadedFiles.audio) missing.push('音声');
                 
-                const errorMsg = `以下のファイルをアップロードしてください: ${missing.join(', ')}`;
+                const errorMsg = `必要なファイルをアップロードしてください`;
                 addLog(errorMsg, 'error');
-                showAlert('error', errorMsg);
+                showAlert('warning', errorMsg);
+                
+                // バリデーションコンテナをハイライト
+                const validationContainer = document.getElementById('validation-container');
+                validationContainer.style.animation = 'shake 0.5s ease';
+                setTimeout(() => {
+                    validationContainer.style.animation = '';
+                }, 500);
+                
                 return;
             }
 
@@ -654,7 +1025,7 @@
                 const editBtn = document.getElementById('edit-btn');
                 const editBtnText = document.getElementById('edit-btn-text');
                 editBtn.disabled = false;
-                editBtnText.innerHTML = '🎬 動画編集開始';
+                editBtnText.innerHTML = '動画編集開始';
                 editBtn.style.opacity = '1';
                 editBtn.style.transform = 'scale(1)';
                 
@@ -676,14 +1047,14 @@
                 const videoList = document.getElementById('video-list');
 
                 if (videos.length === 0) {
-                    videoList.innerHTML = '<p style="text-align: center; color: #6c757d;">まだ作成された動画がありません</p>';
+                    videoList.innerHTML = '<p style="text-align: center; color: #6b7280; grid-column: 1 / -1;">まだ作成された動画がありません</p>';
                     return;
                 }
 
                 videoList.innerHTML = videos.map(video => `
                     <div class="video-card">
                         <div class="video-preview">🎬</div>
-                        <h4>${video.filename}</h4>
+                        <h4 style="margin-bottom: 10px; font-weight: 600;">${video.filename}</h4>
                         <div class="video-info">
                             📏 サイズ: ${video.size} MB<br>
                             📅 作成日: ${new Date(video.created).toLocaleString('ja-JP')}
@@ -720,12 +1091,19 @@
         // アラート表示
         function showAlert(type, message) {
             const container = document.getElementById('alert-container');
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            const alertClass = type === 'success' ? 'alert-success' : 
+                             type === 'error' ? 'alert-error' : 
+                             type === 'warning' ? 'alert-warning' : 'alert-info';
             
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert ${alertClass}`;
-            alertDiv.style.display = 'block';
-            alertDiv.innerHTML = message;
+            alertDiv.style.display = 'flex';
+            
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            alertDiv.innerHTML = `<span>${icon}</span><span>${message}</span>`;
             
             container.innerHTML = '';
             container.appendChild(alertDiv);
@@ -742,7 +1120,8 @@
         // 初期化
         document.addEventListener('DOMContentLoaded', function() {
             loadVideos();
-            console.log('🎬 Web Video Editor 初期化完了');
+            validateFiles();
+            console.log('🎬 Web Video Editor Premium 初期化完了');
         });
     </script>
 </body>

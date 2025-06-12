@@ -37,9 +37,9 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB制限
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mp3|wav/;
+    const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mp3|wav|m4a|aac|ogg|flac|webm/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    const mimetype = allowedTypes.test(file.mimetype) || file.mimetype.startsWith('audio/') || file.mimetype.startsWith('video/');
     
     if (mimetype && extname) {
       return cb(null, true);
@@ -64,6 +64,12 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       return res.status(400).json({ error: 'ファイルが選択されていません' });
     }
 
+    console.log('📤 ファイルアップロード:', {
+      name: req.file.originalname,
+      type: req.file.mimetype,
+      size: req.file.size
+    });
+
     res.json({
       success: true,
       filename: req.file.filename,
@@ -74,6 +80,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ アップロードエラー:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -230,4 +237,6 @@ app.listen(PORT, () => {
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log('📁 Uploads:', uploadsDir);
   console.log('📹 Output:', outputDir);
+  console.log('🔄 Version: 2024-12-06-v3 (Audio formats + Premium UI)');
+  console.log(`📅 Deployed at: ${new Date().toISOString()}`);
 });
