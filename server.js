@@ -211,10 +211,14 @@ app.post('/api/edit-video', async (req, res) => {
   } catch (error) {
     console.error('❌ 動画編集エラー:', error);
     console.error('スタックトレース:', error.stack);
-    res.status(500).json({ 
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined 
-    });
+    
+    // レスポンスが既に送信されているかチェック
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
+    }
   }
 });
 
