@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: web-video-editor
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    disk:
+      name: video-storage
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 10

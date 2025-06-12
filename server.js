@@ -8,6 +8,11 @@ const VideoEditor = require('./video-editor');
 const app = express();
 const PORT = process.env.PORT || 3003;
 
+// Renderのヘルスチェック対応
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // ミドルウェア
 app.use(cors());
 app.use(express.json());
