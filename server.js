@@ -80,10 +80,13 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       size: req.file.size
     });
 
+    // ファイル名をUTF-8でデコード
+    const decodedName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+    
     res.json({
       success: true,
       filename: req.file.filename,
-      originalName: req.file.originalname,
+      originalName: decodedName,
       size: req.file.size,
       type: req.file.mimetype,
       url: `/uploads/${req.file.filename}`
