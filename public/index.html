@@ -216,7 +216,7 @@
         /* Settings Form */
         .settings-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 12px;
         }
 
@@ -557,6 +557,18 @@
                             <label class="form-label-compact" for="audio-start">音声開始時間</label>
                             <input type="text" id="audio-start" class="input-field-compact" value="0:00" placeholder="0:00">
                         </div>
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="image-scale">画像スケール（%）</label>
+                            <input type="number" id="image-scale" class="input-field-compact" value="80" min="10" max="100">
+                        </div>
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="filter-color">フィルター色</label>
+                            <input type="color" id="filter-color" class="input-field-compact" value="#000000">
+                        </div>
+                        <div class="form-group-compact">
+                            <label class="form-label-compact" for="filter-opacity">フィルター透明度（%）</label>
+                            <input type="number" id="filter-opacity" class="input-field-compact" value="0" min="0" max="100">
+                        </div>
                     </div>
                     <div class="validation-text" id="validation-text">※ すべてのファイルを選択してください</div>
                     <button type="submit" class="btn" id="edit-btn" style="margin-top: 16px;">
@@ -799,7 +811,10 @@
                 duration: document.getElementById('duration').value,
                 videoStart: document.getElementById('video-start').value,
                 audioStart: document.getElementById('audio-start').value,
-                outputName: document.getElementById('output-name').value || `video_${Date.now()}.mp4`
+                outputName: document.getElementById('output-name').value || `video_${Date.now()}.mp4`,
+                imageScale: parseInt(document.getElementById('image-scale').value) / 100,
+                filterColor: document.getElementById('filter-color').value,
+                filterOpacity: parseInt(document.getElementById('filter-opacity').value) / 100
             };
 
             try {

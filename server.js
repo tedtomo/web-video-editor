@@ -151,7 +151,10 @@ app.post('/api/edit-video', async (req, res) => {
       duration,
       videoStart = '0:00',
       audioStart = '0:00',
-      outputName = `edited_${Date.now()}.mp4`
+      outputName = `edited_${Date.now()}.mp4`,
+      imageScale = 0.8,
+      filterColor = '#000000',
+      filterOpacity = 0
     } = req.body;
 
     // バリデーション
@@ -200,7 +203,10 @@ app.post('/api/edit-video', async (req, res) => {
       duration: videoEditor.parseTimeToSeconds(duration),
       videoStart: videoEditor.parseTimeToSeconds(videoStart),
       audioStart: videoEditor.parseTimeToSeconds(audioStart),
-      outputName
+      outputName,
+      imageScale,
+      filterColor,
+      filterOpacity
     });
 
     res.json({

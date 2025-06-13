@@ -39,7 +39,10 @@ class VideoEditor {
     duration, 
     videoStart = 0, 
     audioStart = 0, 
-    outputName 
+    outputName,
+    imageScale = 0.8,
+    filterColor = '#000000',
+    filterOpacity = 0
   }) {
     const outputPath = path.join(this.outputDir, outputName);
     
@@ -50,6 +53,9 @@ class VideoEditor {
     console.log('- 時間長:', duration, '秒');
     console.log('- 動画開始:', videoStart, '秒');
     console.log('- 音声開始:', audioStart, '秒');
+    console.log('- 画像スケール:', imageScale * 100, '%');
+    console.log('- フィルター色:', filterColor);
+    console.log('- フィルター透明度:', filterOpacity * 100, '%');
     console.log('- 出力:', outputPath);
 
     return new Promise((resolve, reject) => {
@@ -62,13 +68,33 @@ class VideoEditor {
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
         .input(imagePath);
         
-      // 画像を80%にスケールしてオーバーレイ
-      ff.complexFilter([
-        // 画像を80%の幅にスケール（高さは比例）
-        '[2:v]scale=iw*0.8:ih*0.8[scaled]',
-        // スケールした画像を中央に配置
-        '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
-      ]);
+      // フィルターチェーンを構築
+      const filters = [];
+      
+      // 画像をスケール
+      filters.push(`[2:v]scale=iw*${imageScale}:ih*${imageScale}[scaled]`);
+      
+      // 画像を動画にオーバーレイ
+      filters.push('[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[temp]');
+      
+      // フィルターレイヤーを追加（透明度が0より大きい場合）
+      if (filterOpacity > 0) {
+        // 16進数の色をRGBに変換
+        const r = parseInt(filterColor.substr(1, 2), 16);
+        const g = parseInt(filterColor.substr(3, 2), 16);
+        const b = parseInt(filterColor.substr(5, 2), 16);
+        const alpha = filterOpacity;
+        
+        // カラーフィルターを生成して適用（coloroverlayフィルターを使用）
+        filters.push(`color=c=${filterColor}:s=1920x1080[filter]`);
+        filters.push(`[filter]format=yuva420p,colorchannelmixer=aa=${alpha}[filter_alpha]`);
+        filters.push(`[temp][filter_alpha]overlay=0:0[outv]`);
+      } else {
+        // フィルターなしの場合
+        filters.push('[temp]copy[outv]');
+      }
+      
+      ff.complexFilter(filters);
       
       // 出力設定
       ff.outputOptions([
