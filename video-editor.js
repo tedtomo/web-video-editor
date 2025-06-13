@@ -77,16 +77,11 @@ class VideoEditor {
       // スケールした画像を動画にオーバーレイ
       filters.push('[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite]');
       
-      // カラーフィルターを適用（透明度が0より大きい場合）
-      if (filterOpacity > 0) {
-        // colorフィルターで単色レイヤーを作成して、blendフィルターで合成
-        filters.push(`color=${filterColor}:s=1920x1080:d=${duration}[colorlayer]`);
-        filters.push(`[colorlayer]format=yuva444p,colorchannelmixer=aa=${filterOpacity}[colorlayer_alpha]`);
-        filters.push(`[composite][colorlayer_alpha]overlay=0:0:shortest=1[outv]`);
-      } else {
-        // フィルターなしの場合
-        filters.push('[composite]copy[outv]');
-      }
+      // 最終出力の設定
+      filters.push('[composite]copy[outv]');
+      
+      // TODO: カラーフィルターは後で実装（現在は無効）
+      // 安定性を優先するため、まずは画像スケール機能のみ
       
       ff.complexFilter(filters);
       
@@ -112,7 +107,7 @@ class VideoEditor {
         })
         .on('progress', (progress) => {
           if (progress.percent) {
-            console.log(`⏳ 進行状況: ${Math.round(progress.percent)}%`);
+            console.log(`⏳ 進行状況: ${Math.round(progress.percent)}% | 時間: ${progress.timemark || 'N/A'} | 速度: ${progress.currentKbps || 'N/A'} kbps`);
           }
         })
         .on('end', () => {
@@ -129,11 +124,12 @@ class VideoEditor {
           reject(new Error(`動画合成失敗: ${err.message}`));
         });
         
-      // タイムアウト設定（3分）
+      // タイムアウト設定（5分）
       const timeout = setTimeout(() => {
+        console.error('⏱️ タイムアウト: 5分経過したため処理を中止します');
         ff.kill('SIGKILL');
-        reject(new Error('動画処理がタイムアウトしました'));
-      }, 180000);
+        reject(new Error('動画処理がタイムアウトしました（5分経過）'));
+      }, 300000);
       
       ff.on('end', () => {
         clearTimeout(timeout);
