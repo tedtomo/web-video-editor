@@ -77,11 +77,25 @@ class VideoEditor {
       // スケールした画像を動画にオーバーレイ
       filters.push('[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite]');
       
-      // 最終出力の設定
-      filters.push('[composite]copy[outv]');
-      
-      // TODO: カラーフィルターは後で実装（現在は無効）
-      // 安定性を優先するため、まずは画像スケール機能のみ
+      // カラーフィルターを適用（透明度が0より大きい場合）
+      if (filterOpacity > 0) {
+        // drawboxを使用してシンプルにカラーフィルターを実装
+        const r = parseInt(filterColor.substr(1, 2), 16);
+        const g = parseInt(filterColor.substr(3, 2), 16);
+        const b = parseInt(filterColor.substr(5, 2), 16);
+        const alpha = Math.round(filterOpacity * 255);
+        
+        // colorchannelmixerを使用して色調整
+        const rNorm = r / 255;
+        const gNorm = g / 255;
+        const bNorm = b / 255;
+        
+        // 色相と透明度を調整
+        filters.push(`[composite]colorchannelmixer=rr=${1-filterOpacity+rNorm*filterOpacity}:gg=${1-filterOpacity+gNorm*filterOpacity}:bb=${1-filterOpacity+bNorm*filterOpacity}[outv]`);
+      } else {
+        // フィルターなしの場合
+        filters.push('[composite]copy[outv]');
+      }
       
       ff.complexFilter(filters);
       
