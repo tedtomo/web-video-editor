@@ -62,14 +62,9 @@ class VideoEditor {
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
         .input(imagePath);
         
-      // 画像を動画幅の80%にスケールして中央配置
+      // シンプルなオーバーレイ（まず動作確認）
       ff.complexFilter([
-        // 動画と画像のスケール比較用にscale2refを使用
-        '[2:v][0:v]scale2ref=iw:ih[img][video]',
-        // 画像を80%にスケール（幅を80%、高さは比率維持）
-        '[img]scale=iw*0.8:-1[scaled]',
-        // スケールした画像を動画の中央に配置
-        '[video][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
+        '[0:v][2:v]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
       ]);
       
       // 出力設定
@@ -78,8 +73,9 @@ class VideoEditor {
           '-map', '1:a',
           '-c:v', 'libx264',
           '-c:a', 'aac',
-          '-preset', 'fast',
-          '-crf', '23',
+          '-preset', 'ultrafast',  // より高速なプリセット
+          '-crf', '28',            // 品質を少し下げてメモリ使用量を削減
+          '-threads', '2',         // スレッド数を制限
           '-y'
         ])
         .output(outputPath)
@@ -108,8 +104,21 @@ class VideoEditor {
           console.error('❌ FFmpeg エラー:', err.message);
           console.error('詳細:', err);
           reject(new Error(`動画合成失敗: ${err.message}`));
-        })
-        .run();
+        });
+        
+      // タイムアウト設定（2分）
+      const timeout = setTimeout(() => {
+        ff.kill('SIGKILL');
+        reject(new Error('動画処理がタイムアウトしました'));
+      }, 120000);
+      
+      ff.on('end', () => {
+        clearTimeout(timeout);
+      }).on('error', () => {
+        clearTimeout(timeout);
+      });
+      
+      ff.run();
     });
   }
 
