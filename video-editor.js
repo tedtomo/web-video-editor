@@ -68,13 +68,27 @@ class VideoEditor {
         .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
         .input(imagePath);
         
-      // 画像を指定されたスケールでオーバーレイ（フィルター機能は一旦保留）
-      ff.complexFilter([
-        // 画像を指定されたスケールに変更（高さは比例）
-        `[2:v]scale=iw*${imageScale}:ih*${imageScale}[scaled]`,
-        // スケールした画像を中央に配置
-        '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[outv]'
-      ]);
+      // フィルターチェーンを構築
+      const filters = [];
+      
+      // 画像を指定されたスケールに変更
+      filters.push(`[2:v]scale=iw*${imageScale}:ih*${imageScale}[scaled]`);
+      
+      // スケールした画像を動画にオーバーレイ
+      filters.push('[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite]');
+      
+      // カラーフィルターを適用（透明度が0より大きい場合）
+      if (filterOpacity > 0) {
+        // colorフィルターで単色レイヤーを作成して、blendフィルターで合成
+        filters.push(`color=${filterColor}:s=1920x1080:d=${duration}[colorlayer]`);
+        filters.push(`[colorlayer]format=yuva444p,colorchannelmixer=aa=${filterOpacity}[colorlayer_alpha]`);
+        filters.push(`[composite][colorlayer_alpha]overlay=0:0:shortest=1[outv]`);
+      } else {
+        // フィルターなしの場合
+        filters.push('[composite]copy[outv]');
+      }
+      
+      ff.complexFilter(filters);
       
       // 出力設定
       ff.outputOptions([
