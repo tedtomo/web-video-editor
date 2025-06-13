@@ -579,10 +579,10 @@
                             <input type="number" id="image-scale" class="input-field-compact" value="80" min="10" max="100">
                         </div>
                         <div class="form-group-compact">
-                            <label class="form-label-compact" for="filter-color">フィルター色</label>
-                            <div style="position: relative;">
-                                <input type="color" id="filter-color" class="input-field-compact" value="#000000" title="クリックして色を選択">
-                                <div style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-secondary); pointer-events: none;" id="color-code">#000000</div>
+                            <label class="form-label-compact" for="filter-color-code">フィルター色</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="filter-color-code" class="input-field-compact" value="#000000" placeholder="#000000" style="flex: 1;">
+                                <input type="color" id="filter-color-picker" value="#000000" title="カラーピッカーで選択" style="width: 50px; padding: 4px; cursor: pointer;">
                             </div>
                         </div>
                         <div class="form-group-compact">
@@ -657,9 +657,27 @@
             // Form submission
             document.getElementById('video-edit-form').addEventListener('submit', handleFormSubmit);
             
-            // Color picker change event
-            document.getElementById('filter-color').addEventListener('change', (e) => {
-                document.getElementById('color-code').textContent = e.target.value.toUpperCase();
+            // Color picker and input sync
+            const colorPicker = document.getElementById('filter-color-picker');
+            const colorInput = document.getElementById('filter-color-code');
+            
+            // カラーピッカーが変更されたら入力欄を更新
+            colorPicker.addEventListener('change', (e) => {
+                colorInput.value = e.target.value.toUpperCase();
+            });
+            
+            // 入力欄が変更されたらカラーピッカーを更新
+            colorInput.addEventListener('input', (e) => {
+                let value = e.target.value;
+                // #を自動追加
+                if (value && !value.startsWith('#')) {
+                    value = '#' + value;
+                }
+                // 有効な色コードの場合のみピッカーを更新
+                if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                    colorPicker.value = value;
+                    colorInput.value = value.toUpperCase();
+                }
             });
         }
 
@@ -838,7 +856,7 @@
                 audioStart: document.getElementById('audio-start').value,
                 outputName: document.getElementById('output-name').value || `video_${Date.now()}.mp4`,
                 imageScale: parseInt(document.getElementById('image-scale').value) / 100,
-                filterColor: document.getElementById('filter-color').value,
+                filterColor: document.getElementById('filter-color-code').value,
                 filterOpacity: parseInt(document.getElementById('filter-opacity').value) / 100
             };
 
