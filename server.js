@@ -267,8 +267,12 @@ let googleConfig = null;
 
 // 環境変数から設定を読み込む（Render用）
 console.log('🔍 環境変数GOOGLE_CONFIGの存在確認:', !!process.env.GOOGLE_CONFIG);
+console.log('🔍 環境変数の長さ:', process.env.GOOGLE_CONFIG?.length || 0);
 if (process.env.GOOGLE_CONFIG) {
   try {
+    console.log('🔍 JSON文字列の最初の200文字:', process.env.GOOGLE_CONFIG.substring(0, 200));
+    console.log('🔍 JSON文字列の最後の100文字:', process.env.GOOGLE_CONFIG.substring(process.env.GOOGLE_CONFIG.length - 100));
+    
     googleConfig = JSON.parse(process.env.GOOGLE_CONFIG);
     console.log('✅ 環境変数からGoogle設定を読み込みました');
     console.log('📋 読み込んだ設定:', {
@@ -277,8 +281,26 @@ if (process.env.GOOGLE_CONFIG) {
       driveFolderId: googleConfig.driveFolderId
     });
   } catch (error) {
-    console.error('❌ 環境変数のGoogle設定パースエラー:', error);
-    console.error('設定値の最初の100文字:', process.env.GOOGLE_CONFIG?.substring(0, 100));
+    console.error('❌ 環境変数のGoogle設定パースエラー:', error.message);
+    console.error('❌ エラー詳細:', error.stack);
+    console.error('❌ 設定値の最初の200文字:', process.env.GOOGLE_CONFIG?.substring(0, 200));
+    console.error('❌ 設定値の最後の100文字:', process.env.GOOGLE_CONFIG?.substring(process.env.GOOGLE_CONFIG.length - 100));
+    
+    // 手動で問題を特定
+    const envValue = process.env.GOOGLE_CONFIG;
+    console.error('❌ 不正な文字チェック:');
+    console.error('- 開始文字:', envValue.charCodeAt(0), '(', envValue[0], ')');
+    console.error('- 終了文字:', envValue.charCodeAt(envValue.length - 1), '(', envValue[envValue.length - 1], ')');
+    
+    // 簡単な修正を試す
+    try {
+      const trimmedValue = envValue.trim();
+      const testConfig = JSON.parse(trimmedValue);
+      console.log('✅ trim()後のパースに成功しました');
+      googleConfig = testConfig;
+    } catch (retryError) {
+      console.error('❌ trim()後もパースに失敗:', retryError.message);
+    }
   }
 } else {
   console.log('⚠️ 環境変数GOOGLE_CONFIGが設定されていません');
