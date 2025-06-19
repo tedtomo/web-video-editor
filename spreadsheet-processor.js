@@ -214,9 +214,16 @@ class SpreadsheetProcessor {
           console.log('✅ 動画生成完了:', row.outputFileName);
           const videoUrl = `/output/${row.outputFileName}`;
 
-          // スプレッドシートを更新（公開リンク方式では更新不可）
-          await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
-          await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
+          // スプレッドシートを更新
+          const urlResult = await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
+          const flagResult = await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
+          
+          // 更新結果をログに記録
+          if (urlResult.updated && flagResult.updated) {
+            console.log(`📝 スプレッドシート更新完了: 行${row.rowIndex}`);
+          } else {
+            console.log(`📝 スプレッドシート更新スキップ: 行${row.rowIndex} (Google Apps Script未設定)`);
+          }
 
           // 一時ファイルを削除
           await this.cleanupTempFiles([imagePath, videoPath, audioPath]);
