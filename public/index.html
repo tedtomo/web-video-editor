@@ -1036,18 +1036,26 @@
                             
                             // 失敗の詳細を表示
                             const failedResults = result.results.filter(item => !item.success);
-                            failedResults.forEach(item => {
+                            failedResults.forEach((item, index) => {
                                 setTimeout(() => {
-                                    showAlert('error', `❌ ${item.fileName || '行' + item.rowIndex}: ${item.error}`);
-                                }, 100);
+                                    showAlert('error', `❌ ${item.fileName || '行' + item.rowIndex}: ${item.error || 'エラー詳細なし'}`);
+                                }, 100 * (index + 1));
                             });
                         } else {
-                            showAlert('success', `処理完了: ${result.successful}件成功`);
+                            showAlert('success', `🎉 処理完了: ${result.successful}件の動画を作成しました！`);
                         }
                         
                         // 成功した動画がある場合は、動画リストを更新
                         if (result.successful > 0) {
                             await loadVideos();
+                            
+                            // 成功した動画の詳細を表示
+                            const successResults = result.results.filter(item => item.success);
+                            successResults.forEach((item, index) => {
+                                setTimeout(() => {
+                                    showAlert('success', `✅ ${item.fileName}: 作成完了`);
+                                }, 200 * (index + 1));
+                            });
                         }
                         
                         // 詳細結果をコンソールに表示

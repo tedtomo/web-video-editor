@@ -174,6 +174,22 @@ class SpreadsheetProcessor {
             }
           }
 
+          // ファイルの存在確認
+          const missingFiles = [];
+          if (row.imageUrl && !await fs.pathExists(imagePath)) {
+            missingFiles.push('画像');
+          }
+          if (row.videoUrl && !await fs.pathExists(videoPath)) {
+            missingFiles.push('動画');
+          }
+          if (row.audioUrl && !await fs.pathExists(audioPath)) {
+            missingFiles.push('音声');
+          }
+
+          if (missingFiles.length > 0) {
+            throw new Error(`必要なファイルがダウンロードできませんでした: ${missingFiles.join(', ')}`);
+          }
+
           // 動画を生成（柔軟な処理）
           console.log('動画を生成中...');
           console.log('動画生成に使用するファイルパス:');
@@ -195,7 +211,7 @@ class SpreadsheetProcessor {
           });
 
           // ローカル出力フォルダに保存（Drive API認証不要）
-          console.log('動画ファイルを出力フォルダに保存...');
+          console.log('✅ 動画生成完了:', row.outputFileName);
           const videoUrl = `/output/${row.outputFileName}`;
 
           // スプレッドシートを更新（公開リンク方式では更新不可）

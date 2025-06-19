@@ -541,22 +541,15 @@ app.post('/api/spreadsheet-sync', async (req, res) => {
 
     console.log(`✅ ${executionRows.length}件の実行対象行を発見`);
 
-    res.json({
-      success: true,
-      message: `${executionRows.length}件の処理対象が見つかりました`,
-      totalRows: executionRows.length,
-      results: executionRows.map(row => ({
-        rowIndex: row.rowIndex,
-        outputFileName: row.outputFileName,
-        hasImage: !!row.imageUrl,
-        hasVideo: !!row.videoUrl,
-        hasAudio: !!row.audioUrl,
-        duration: row.duration,
-        imageUrl: row.imageUrl,
-        videoUrl: row.videoUrl,
-        audioUrl: row.audioUrl
-      }))
-    });
+    // 実際の動画処理を実行
+    const processor = require('./spreadsheet-processor');
+    const processorInstance = new processor();
+    await processorInstance.initialize();
+
+    console.log('🎬 動画処理を開始します...');
+    const result = await processorInstance.processSpreadsheet(spreadsheetId, { sheetName });
+
+    res.json(result);
 
   } catch (error) {
     console.error('公開スプレッドシート連携エラー:', error);
