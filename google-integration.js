@@ -31,6 +31,11 @@ class GoogleIntegration {
   // 認証初期化
   async initialize(credentials) {
     try {
+      console.log('🔐 Google認証初期化開始');
+      console.log('📋 認証タイプ:', credentials.type);
+      console.log('📧 クライアントメール:', credentials.client_email);
+      console.log('🔑 プライベートキーの最初の50文字:', credentials.private_key?.substring(0, 50) + '...');
+      
       // サービスアカウントまたはOAuth2認証を使用
       if (credentials.type === 'service_account') {
         // JWT認証の正しい形式
@@ -58,11 +63,28 @@ class GoogleIntegration {
       // JWTの場合、認証を実行
       if (credentials.type === 'service_account') {
         console.log('🔑 サービスアカウント認証を実行中...');
+        console.log('🔍 authオブジェクトの確認:', !!this.auth);
+        console.log('🔍 authorizeメソッドの存在:', typeof this.auth.authorize);
+        
         try {
-          await this.auth.authorize();
+          const authClient = await this.auth.authorize();
           console.log('✅ 認証成功');
+          console.log('🔍 認証結果:', !!authClient);
+          
+          // 認証結果があればそれを使用
+          if (authClient) {
+            this.auth = authClient;
+          }
         } catch (authError) {
           console.error('❌ 認証エラー:', authError);
+          console.error('❌ エラー詳細:', authError.stack);
+          
+          // access_tokenエラーの場合、プライベートキーの問題の可能性
+          if (authError.message && authError.message.includes('access_token')) {
+            console.error('❌ プライベートキーが正しくフォーマットされていない可能性があります');
+            console.error('❌ キーの改行文字を確認してください');
+          }
+          
           throw new Error(`Google認証に失敗しました: ${authError.message}`);
         }
       }
