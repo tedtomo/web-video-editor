@@ -266,13 +266,22 @@ app.use('/output', express.static(outputDir));
 let googleConfig = null;
 
 // 環境変数から設定を読み込む（Render用）
+console.log('🔍 環境変数GOOGLE_CONFIGの存在確認:', !!process.env.GOOGLE_CONFIG);
 if (process.env.GOOGLE_CONFIG) {
   try {
     googleConfig = JSON.parse(process.env.GOOGLE_CONFIG);
     console.log('✅ 環境変数からGoogle設定を読み込みました');
+    console.log('📋 読み込んだ設定:', {
+      spreadsheetId: googleConfig.spreadsheetId,
+      hasCredentials: !!googleConfig.credentials,
+      driveFolderId: googleConfig.driveFolderId
+    });
   } catch (error) {
     console.error('❌ 環境変数のGoogle設定パースエラー:', error);
+    console.error('設定値の最初の100文字:', process.env.GOOGLE_CONFIG?.substring(0, 100));
   }
+} else {
+  console.log('⚠️ 環境変数GOOGLE_CONFIGが設定されていません');
 }
 
 // 環境変数にない場合は設定ファイルから読み込む
@@ -303,7 +312,13 @@ app.get('/api/google-config', (req, res) => {
     };
     res.json({ exists: true, config: maskedConfig });
   } else {
-    res.json({ exists: false });
+    res.json({ 
+      exists: false,
+      debug: {
+        hasEnvVar: !!process.env.GOOGLE_CONFIG,
+        configFileExists: require('fs').existsSync(require('path').join(__dirname, 'config', 'google-config.json'))
+      }
+    });
   }
 });
 
