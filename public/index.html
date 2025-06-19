@@ -490,6 +490,11 @@
     <nav class="nav">
         <div class="nav-content">
             <div class="logo">動画エディター</div>
+            <div style="margin-left: auto;">
+                <a href="/spreadsheet-config.html" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">
+                    スプレッドシート連携 →
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -591,9 +596,14 @@
                         </div>
                     </div>
                     <div class="validation-text" id="validation-text">※ すべてのファイルを選択してください</div>
-                    <button type="submit" class="btn" id="edit-btn" style="margin-top: 16px;">
-                        <span id="edit-btn-text">動画を作成</span>
-                    </button>
+                    <div style="display: flex; gap: 12px; margin-top: 16px;">
+                        <button type="submit" class="btn" id="edit-btn" style="flex: 1;">
+                            <span id="edit-btn-text">動画を作成</span>
+                        </button>
+                        <button type="button" class="btn" id="spreadsheet-btn" style="flex: 1; background: var(--accent-green);" onclick="executeSpreadsheet()">
+                            <span id="spreadsheet-btn-text">スプレッドシートから実行</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -966,10 +976,102 @@
             
             container.appendChild(alert);
 
+            // エラーメッセージは長く表示
+            const duration = type === 'error' ? 6000 : 3000;
+            
             setTimeout(() => {
                 alert.style.opacity = '0';
                 setTimeout(() => alert.remove(), 300);
-            }, 3000);
+            }, duration);
+        }
+
+        // Execute from spreadsheet
+        async function executeSpreadsheet() {
+            const spreadsheetBtn = document.getElementById('spreadsheet-btn');
+            const spreadsheetBtnText = document.getElementById('spreadsheet-btn-text');
+            
+            // Check if config exists
+            try {
+                const configResponse = await fetch('/api/google-config');
+                const configData = await configResponse.json();
+                
+                if (!configData.exists) {
+                    showAlert('error', '設定ファイルが見つかりません。スプレッドシート連携の設定を行ってください。');
+                    setTimeout(() => {
+                        window.location.href = '/spreadsheet-config.html';
+                    }, 2000);
+                    return;
+                }
+            } catch (error) {
+                showAlert('error', '設定の確認中にエラーが発生しました。');
+                return;
+            }
+            
+            spreadsheetBtn.disabled = true;
+            spreadsheetBtnText.textContent = '処理中...';
+            document.getElementById('progress-overlay').style.display = 'flex';
+            document.getElementById('progress-message').textContent = 'スプレッドシートを処理しています...';
+            
+            try {
+                const response = await fetch('/api/spreadsheet-sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})  // 設定ファイルから自動的に読み込まれる
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (result.totalProcessed === 0) {
+                        showAlert('error', '実行対象の行がありません。スプレッドシートで実行対象に○を入力してください。');
+                    } else {
+                        // エラーがある場合は詳細を表示
+                        if (result.failed > 0) {
+                            showAlert('error', `処理完了: ${result.successful}件成功、${result.failed}件失敗`);
+                            
+                            // 失敗の詳細を表示
+                            const failedResults = result.results.filter(item => !item.success);
+                            failedResults.forEach(item => {
+                                setTimeout(() => {
+                                    showAlert('error', `❌ ${item.fileName || '行' + item.rowIndex}: ${item.error}`);
+                                }, 100);
+                            });
+                        } else {
+                            showAlert('success', `処理完了: ${result.successful}件成功`);
+                        }
+                        
+                        // 成功した動画がある場合は、動画リストを更新
+                        if (result.successful > 0) {
+                            await loadVideos();
+                        }
+                        
+                        // 詳細結果をコンソールに表示
+                        if (result.results && result.results.length > 0) {
+                            console.log('=== スプレッドシート処理結果 ===');
+                            result.results.forEach(item => {
+                                if (item.success) {
+                                    console.log(`✅ 成功 (行${item.rowIndex}): ${item.fileName}`);
+                                    console.log(`   動画URL: ${item.videoUrl}`);
+                                } else {
+                                    console.error(`❌ 失敗 (行${item.rowIndex}): ${item.fileName || 'ファイル名なし'}`);
+                                    console.error(`   エラー: ${item.error}`);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    showAlert('error', 'エラー: ' + result.error);
+                }
+            } catch (error) {
+                showAlert('error', `通信エラー: ${error.message}`);
+                console.error('詳細エラー:', error);
+            } finally {
+                spreadsheetBtn.disabled = false;
+                spreadsheetBtnText.textContent = 'スプレッドシートから実行';
+                document.getElementById('progress-overlay').style.display = 'none';
+            }
         }
     </script>
 </body>

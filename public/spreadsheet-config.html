@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スプレッドシート連携設定 — 動画エディター</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --bg-primary: #fbfbfd;
+            --bg-secondary: #f5f5f7;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --accent-blue: #0071e3;
+            --accent-blue-hover: #0077ed;
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --border-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #007AFF, #34C759);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+
+        .status.error {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+
+        .help-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .results {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 113, 227, 0.2);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .processing {
+            display: none;
+            align-items: center;
+            margin-top: 1rem;
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>スプレッドシート連携設定</h1>
+        <p class="subtitle">Googleスプレッドシートから動画を一括生成します</p>
+
+        <div class="status success" id="config-status" style="display: none;">
+            設定ファイルが読み込まれました。設定を変更する場合は以下のフォームを編集してください。
+        </div>
+
+        <div class="card">
+            <h2>基本設定</h2>
+            <div class="form-group">
+                <label for="spreadsheetId">スプレッドシートID</label>
+                <input type="text" id="spreadsheetId" placeholder="例: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
+                <p class="help-text">GoogleスプレッドシートのURLから、/d/と/editの間の文字列をコピーしてください</p>
+            </div>
+
+            <div class="form-group">
+                <label for="credentials">認証情報（JSON）</label>
+                <textarea id="credentials" placeholder='{ "type": "service_account", ... }'></textarea>
+                <p class="help-text">Google Cloud ConsoleからダウンロードしたサービスアカウントのJSONキーを貼り付けてください</p>
+            </div>
+
+            <div class="form-group">
+                <label for="driveFolderId">保存先フォルダID（オプション）</label>
+                <input type="text" id="driveFolderId" placeholder="例: 1XnZxGIT_1KNmyOqhX9rPR3EC-tLFH9Cv">
+                <p class="help-text">生成した動画を保存するGoogle DriveフォルダのID（空欄の場合はルートに保存）</p>
+            </div>
+
+            <div class="form-group">
+                <label for="range">処理範囲（オプション）</label>
+                <input type="text" id="range" placeholder="A:L" value="A:L">
+                <p class="help-text">スプレッドシートの処理範囲（デフォルト: A:L）</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>処理オプション</h2>
+            <div class="form-group">
+                <label>
+                    <input type="radio" name="processType" value="once" checked> 一度だけ実行
+                </label>
+                <label style="margin-top: 0.5rem;">
+                    <input type="radio" name="processType" value="periodic"> 定期実行
+                </label>
+            </div>
+
+            <div class="form-group" id="intervalGroup" style="display: none;">
+                <label for="intervalMinutes">実行間隔（分）</label>
+                <input type="number" id="intervalMinutes" value="5" min="1" max="60">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" onclick="startProcessing()">処理を開始</button>
+            <button class="btn-secondary" onclick="window.location.href='/'">メイン画面に戻る</button>
+        </div>
+
+        <div class="processing">
+            <span class="spinner"></span>
+            <span>処理中...</span>
+        </div>
+
+        <div class="status" id="status"></div>
+        <div class="results" id="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        // ページ読み込み時に設定ファイルを確認
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/google-config');
+                const data = await response.json();
+                
+                if (data.exists && data.config) {
+                    // 設定ファイルが存在する場合、フォームに値を設定
+                    document.getElementById('config-status').style.display = 'block';
+                    
+                    if (data.config.spreadsheetId) {
+                        document.getElementById('spreadsheetId').value = data.config.spreadsheetId;
+                    }
+                    
+                    if (data.config.driveFolderId) {
+                        document.getElementById('driveFolderId').value = data.config.driveFolderId;
+                    }
+                    
+                    if (data.config.range) {
+                        document.getElementById('range').value = data.config.range;
+                    }
+                    
+                    if (data.config.autoProcessInterval) {
+                        document.getElementById('intervalMinutes').value = data.config.autoProcessInterval;
+                    }
+                    
+                    // 認証情報は設定ファイルから自動的に使用されるため、フォームには表示しない
+                    document.getElementById('credentials').placeholder = '設定ファイルから自動的に読み込まれます';
+                }
+            } catch (error) {
+                console.error('設定ファイルの読み込みエラー:', error);
+            }
+        });
+
+        // ラジオボタンの切り替え
+        document.querySelectorAll('input[name="processType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const intervalGroup = document.getElementById('intervalGroup');
+                intervalGroup.style.display = e.target.value === 'periodic' ? 'block' : 'none';
+            });
+        });
+
+        async function startProcessing() {
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+            const credentialsText = document.getElementById('credentials').value.trim();
+            const driveFolderId = document.getElementById('driveFolderId').value.trim() || null;
+            const range = document.getElementById('range').value.trim() || 'A:L';
+            const processType = document.querySelector('input[name="processType"]:checked').value;
+            const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value) || 5;
+
+            // バリデーション
+            if (!spreadsheetId) {
+                showStatus('error', 'スプレッドシートIDは必須です');
+                return;
+            }
+
+            let credentials = null;
+            if (credentialsText) {
+                // 認証情報が入力されている場合はパース
+                try {
+                    credentials = JSON.parse(credentialsText);
+                } catch (e) {
+                    showStatus('error', '認証情報のJSONが無効です: ' + e.message);
+                    return;
+                }
+            }
+            // 認証情報が入力されていない場合は、サーバー側で設定ファイルから読み込まれる
+
+            // 処理開始
+            showProcessing(true);
+            showStatus('', '');
+
+            try {
+                const endpoint = processType === 'periodic' 
+                    ? '/api/spreadsheet-sync/start-periodic'
+                    : '/api/spreadsheet-sync';
+
+                const body = {
+                    spreadsheetId,
+                    credentials,
+                    driveFolderId,
+                    range
+                };
+
+                if (processType === 'periodic') {
+                    body.intervalMinutes = intervalMinutes;
+                }
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    if (processType === 'periodic') {
+                        showStatus('success', result.message);
+                    } else {
+                        showStatus('success', `処理完了: ${result.successful}件成功、${result.failed}件失敗`);
+                        showResults(result);
+                    }
+                } else {
+                    showStatus('error', 'エラー: ' + result.error);
+                }
+            } catch (error) {
+                showStatus('error', 'ネットワークエラー: ' + error.message);
+            } finally {
+                showProcessing(false);
+            }
+        }
+
+        function showStatus(type, message) {
+            const statusEl = document.getElementById('status');
+            if (!message) {
+                statusEl.style.display = 'none';
+                return;
+            }
+            statusEl.className = 'status ' + type;
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+        }
+
+        function showProcessing(show) {
+            document.querySelector('.processing').style.display = show ? 'flex' : 'none';
+            document.querySelector('.btn-primary').disabled = show;
+        }
+
+        function showResults(result) {
+            const resultsEl = document.getElementById('results');
+            if (result.results && result.results.length > 0) {
+                resultsEl.textContent = JSON.stringify(result, null, 2);
+                resultsEl.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

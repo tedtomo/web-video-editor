@@ -31,7 +31,357 @@ class VideoEditor {
     return seconds;
   }
 
-  // 複合動画作成
+  // 柔軟な動画作成（利用可能なファイルに応じて処理）
+  async createFlexibleVideo({
+    backgroundVideoPath,
+    imagePath,
+    audioPath,
+    duration = 20,
+    videoStart = 0,
+    audioStart = 0,
+    outputName,
+    imageScale = 0.8,
+    filterColor = '#000000',
+    filterOpacity = 0
+  }) {
+    // 利用可能なファイルを確認
+    const hasVideo = backgroundVideoPath && await fs.pathExists(backgroundVideoPath);
+    const hasImage = imagePath && await fs.pathExists(imagePath);
+    const hasAudio = audioPath && await fs.pathExists(audioPath);
+
+    console.log('📁 利用可能なファイル:');
+    console.log('- 動画:', hasVideo ? `✓ (${backgroundVideoPath})` : `✗ (${backgroundVideoPath})`);
+    console.log('- 画像:', hasImage ? `✓ (${imagePath})` : `✗ (${imagePath})`);
+    console.log('- 音声:', hasAudio ? `✓ (${audioPath})` : `✗ (${audioPath})`);
+
+    // すべてのファイルがある場合は従来の処理
+    if (hasVideo && hasImage && hasAudio) {
+      return this.createCompositeVideo({
+        backgroundVideoPath,
+        imagePath,
+        audioPath,
+        duration,
+        videoStart,
+        audioStart,
+        outputName,
+        imageScale,
+        filterColor,
+        filterOpacity
+      });
+    }
+
+    // 音声のみの場合は、黒い背景の動画を作成
+    if (!hasVideo && !hasImage && hasAudio) {
+      return this.createAudioOnlyVideo({
+        audioPath,
+        duration,
+        audioStart,
+        outputName
+      });
+    }
+
+    // 動画と音声のみの場合
+    if (hasVideo && !hasImage && hasAudio) {
+      console.log('🎬 動画と音声のみで処理します');
+      return this.createVideoWithAudio({
+        videoPath: backgroundVideoPath,
+        audioPath,
+        duration,
+        videoStart,
+        audioStart,
+        outputName
+      });
+    }
+
+    // 動画と画像のみの場合（音声なし）
+    if (hasVideo && hasImage && !hasAudio) {
+      console.log('🎬 動画と画像のみで処理します（音声なし）');
+      return this.createVideoWithImageOnly({
+        videoPath: backgroundVideoPath,
+        imagePath,
+        duration,
+        videoStart,
+        outputName,
+        imageScale,
+        filterColor,
+        filterOpacity
+      });
+    }
+
+    // 動画のみの場合
+    if (hasVideo && !hasImage && !hasAudio) {
+      console.log('🎬 動画のみで処理します');
+      return this.createVideoOnly({
+        videoPath: backgroundVideoPath,
+        duration,
+        videoStart,
+        outputName
+      });
+    }
+
+    // その他の組み合わせも必要に応じて追加可能
+    console.error('利用可能なファイル組み合わせではありません:', { hasVideo, hasImage, hasAudio });
+    throw new Error('有効なファイルの組み合わせではありません');
+  }
+
+  // 音声のみから動画を作成（黒い背景）
+  async createAudioOnlyVideo({
+    audioPath,
+    duration,
+    audioStart = 0,
+    outputName
+  }) {
+    const outputPath = path.join(this.outputDir, outputName);
+    
+    console.log('🎵 音声のみの動画を作成:');
+    console.log('- 音声:', audioPath);
+    console.log('- 時間長:', duration, '秒');
+    console.log('- 音声開始:', audioStart, '秒');
+
+    return new Promise((resolve, reject) => {
+      const ff = ffmpeg();
+      
+      // 黒い背景を生成
+      ff.input('color=c=black:s=1920x1080:d=' + duration)
+        .inputFormat('lavfi')
+        .input(audioPath)
+        .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()]);
+
+      // 出力設定
+      ff.outputOptions([
+          '-map', '0:v',
+          '-map', '1:a',
+          '-c:v', 'libx264',
+          '-c:a', 'aac',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-shortest'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('end', () => {
+          console.log('✅ 動画生成完了:', outputName);
+          resolve({
+            filename: outputName,
+            path: outputPath,
+            url: `/output/${outputName}`
+          });
+        })
+        .on('error', (err) => {
+          console.error('❌ FFmpeg エラー:', err.message);
+          reject(new Error(`動画生成失敗: ${err.message}`));
+        })
+        .run();
+    });
+  }
+
+  // 動画と音声を組み合わせる（画像オーバーレイなし）
+  async createVideoWithAudio({
+    videoPath,
+    audioPath,
+    duration,
+    videoStart = 0,
+    audioStart = 0,
+    outputName
+  }) {
+    const outputPath = path.join(this.outputDir, outputName);
+    
+    console.log('🎬 動画と音声を結合:');
+    console.log('- 動画:', videoPath);
+    console.log('- 音声:', audioPath);
+    console.log('- 時間長:', duration, '秒');
+
+    return new Promise((resolve, reject) => {
+      const ff = ffmpeg();
+      
+      ff.input(videoPath)
+        .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()])
+        .input(audioPath)
+        .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()]);
+
+      // 出力設定
+      ff.outputOptions([
+          '-map', '0:v',
+          '-map', '1:a',
+          '-c:v', 'libx264',
+          '-c:a', 'aac',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-shortest'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('end', () => {
+          console.log('✅ 動画生成完了:', outputName);
+          resolve({
+            filename: outputName,
+            path: outputPath,
+            url: `/output/${outputName}`
+          });
+        })
+        .on('error', (err) => {
+          console.error('❌ FFmpeg エラー:', err.message);
+          reject(new Error(`動画生成失敗: ${err.message}`));
+        })
+        .run();
+    });
+  }
+
+  // 動画と画像のみの処理（音声なし）
+  async createVideoWithImageOnly({
+    videoPath,
+    imagePath,
+    duration,
+    videoStart = 0,
+    outputName,
+    imageScale = 0.8,
+    filterColor = '#000000',
+    filterOpacity = 0
+  }) {
+    const outputPath = path.join(this.outputDir, outputName);
+    
+    console.log('🎬 動画と画像を結合（音声なし）:');
+    console.log('- 動画:', videoPath);
+    console.log('- 画像:', imagePath);
+    console.log('- 時間長:', duration, '秒');
+
+    return new Promise((resolve, reject) => {
+      const ff = ffmpeg();
+      
+      ff.input(videoPath)
+        .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()])
+        .input(imagePath);
+
+      // フィルターチェーンを構築
+      console.log('🎨 フィルター適用判定:', { filterOpacity, filterColor, apply: filterOpacity > 0 });
+      
+      let filterComplex = '';
+      
+      // 画像をスケール
+      filterComplex += `[1:v]scale=w='min(iw*${imageScale},1920)':h='min(ih*${imageScale},1080)':force_original_aspect_ratio=decrease[scaled];`;
+      
+      // 画像を動画にオーバーレイ
+      filterComplex += '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite];';
+      
+      // カラーフィルターを適用（元の実装に戻す）
+      if (filterOpacity > 0) {
+        // カラーを16進数からRGBに変換
+        const r = parseInt(filterColor.substr(1, 2), 16);
+        const g = parseInt(filterColor.substr(3, 2), 16);
+        const b = parseInt(filterColor.substr(5, 2), 16);
+        
+        // colorchannelmixerを使用（元の実装）
+        const rNorm = r / 255;
+        const gNorm = g / 255;
+        const bNorm = b / 255;
+        
+        // filterOpacityは既に0-1の範囲
+        const opacity = filterOpacity;
+        
+        // 色相と透明度を調整
+        const rr = 1 - opacity + rNorm * opacity;
+        const gg = 1 - opacity + gNorm * opacity;
+        const bb = 1 - opacity + bNorm * opacity;
+        
+        filterComplex += `[composite]colorchannelmixer=rr=${rr}:gg=${gg}:bb=${bb}[outv]`;
+        console.log('✅ カラーフィルター適用:', filterColor, '透明度:', (opacity * 100).toFixed(0) + '%');
+      } else {
+        filterComplex += '[composite]copy[outv]';
+        console.log('⏭️ フィルターをスキップ（透明度が0）');
+      }
+      
+      // フィルターチェーンをログ出力
+      console.log('📐 最終フィルターチェーン:', filterComplex);
+      ff.complexFilter(filterComplex);
+
+      // 出力設定（音声なし）
+      ff.outputOptions([
+          '-map', '[outv]',
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-threads', '1',
+          '-max_muxing_queue_size', '1024',
+          '-y'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('end', () => {
+          console.log('✅ 動画生成完了:', outputName);
+          resolve({
+            filename: outputName,
+            path: outputPath,
+            url: `/output/${outputName}`
+          });
+        })
+        .on('error', (err) => {
+          console.error('❌ FFmpeg エラー:', err.message);
+          reject(new Error(`動画生成失敗: ${err.message}`));
+        })
+        .run();
+    });
+  }
+
+  // 動画のみの処理
+  async createVideoOnly({
+    videoPath,
+    duration,
+    videoStart = 0,
+    outputName
+  }) {
+    const outputPath = path.join(this.outputDir, outputName);
+    
+    console.log('🎬 動画のみを処理:');
+    console.log('- 動画:', videoPath);
+    console.log('- 時間長:', duration, '秒');
+
+    return new Promise((resolve, reject) => {
+      const ff = ffmpeg();
+      
+      ff.input(videoPath)
+        .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()]);
+
+      // 出力設定
+      ff.outputOptions([
+          '-map', '0:v',
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-threads', '1',
+          '-max_muxing_queue_size', '1024',
+          '-y'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('end', () => {
+          console.log('✅ 動画生成完了:', outputName);
+          resolve({
+            filename: outputName,
+            path: outputPath,
+            url: `/output/${outputName}`
+          });
+        })
+        .on('error', (err) => {
+          console.error('❌ FFmpeg エラー:', err.message);
+          reject(new Error(`動画生成失敗: ${err.message}`));
+        })
+        .run();
+    });
+  }
+
+  // 複合動画作成（既存のメソッド）
   async createCompositeVideo({ 
     backgroundVideoPath, 
     imagePath, 
@@ -63,51 +413,70 @@ class VideoEditor {
       
       // 入力ファイルを追加
       ff.input(backgroundVideoPath)
-        .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()])
+        .inputOptions([
+          '-ss', this.parseTimeToSeconds(videoStart).toString(), 
+          '-t', duration.toString(),
+          '-vsync', '0'  // 入力の同期を無効化
+        ])
         .input(audioPath)
-        .inputOptions(['-ss', audioStart.toString(), '-t', duration.toString()])
-        .input(imagePath);
+        .inputOptions(['-ss', this.parseTimeToSeconds(audioStart).toString(), '-t', duration.toString()])
+        .input(imagePath)
+        .inputOptions(['-loop', '1', '-t', duration.toString()]); // 画像をループさせる
         
       // フィルターチェーンを構築
-      const filters = [];
+      console.log('🎨 フィルター適用判定:', { filterOpacity, filterColor, apply: filterOpacity > 0 });
       
-      // 画像を指定されたスケールに変更
-      filters.push(`[2:v]scale=iw*${imageScale}:ih*${imageScale}[scaled]`);
+      let filterComplex = '';
       
-      // スケールした画像を動画にオーバーレイ
-      filters.push('[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite]');
+      // 画像をスケール
+      filterComplex += `[2:v]scale=w='min(iw*${imageScale},1920)':h='min(ih*${imageScale},1080)':force_original_aspect_ratio=decrease[scaled];`;
       
-      // カラーフィルターを適用（透明度が0より大きい場合）
+      // 画像を動画にオーバーレイ
+      filterComplex += '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite];';
+      
+      // カラーフィルターを適用（元の実装に戻す）
       if (filterOpacity > 0) {
-        // drawboxを使用してシンプルにカラーフィルターを実装
+        // カラーを16進数からRGBに変換
         const r = parseInt(filterColor.substr(1, 2), 16);
         const g = parseInt(filterColor.substr(3, 2), 16);
         const b = parseInt(filterColor.substr(5, 2), 16);
-        const alpha = Math.round(filterOpacity * 255);
         
-        // colorchannelmixerを使用して色調整
+        // colorchannelmixerを使用（元の実装）
         const rNorm = r / 255;
         const gNorm = g / 255;
         const bNorm = b / 255;
         
+        // filterOpacityは既に0-1の範囲
+        const opacity = filterOpacity;
+        
         // 色相と透明度を調整
-        filters.push(`[composite]colorchannelmixer=rr=${1-filterOpacity+rNorm*filterOpacity}:gg=${1-filterOpacity+gNorm*filterOpacity}:bb=${1-filterOpacity+bNorm*filterOpacity}[outv]`);
+        const rr = 1 - opacity + rNorm * opacity;
+        const gg = 1 - opacity + gNorm * opacity;
+        const bb = 1 - opacity + bNorm * opacity;
+        
+        filterComplex += `[composite]colorchannelmixer=rr=${rr}:gg=${gg}:bb=${bb}[outv]`;
+        console.log('✅ カラーフィルター適用:', filterColor, '透明度:', (opacity * 100).toFixed(0) + '%');
       } else {
-        // フィルターなしの場合
-        filters.push('[composite]copy[outv]');
+        filterComplex += '[composite]copy[outv]';
+        console.log('⏭️ フィルターをスキップ（透明度が0）');
       }
       
-      ff.complexFilter(filters);
+      // フィルターチェーンをログ出力
+      console.log('📐 最終フィルターチェーン:', filterComplex);
+      ff.complexFilter(filterComplex);
       
       // 出力設定
       ff.outputOptions([
           '-map', '[outv]',
           '-map', '1:a',
           '-c:v', 'libx264',
-          '-c:a', 'aac',
-          '-preset', 'ultrafast',  // より高速なプリセット
-          '-crf', '28',            // 品質を少し下げてメモリ使用量を削減
-          '-threads', '2',         // スレッド数を制限
+          '-c:a', 'copy',          // 音声は再エンコードしない
+          '-preset', 'ultrafast',  // 最速プリセット
+          '-crf', '28',            // 品質を下げて高速化
+          '-pix_fmt', 'yuv420p',
+          '-threads', '2',         // スレッド数を減らして安定化
+          '-max_muxing_queue_size', '1024',
+          '-shortest',             // 最短の入力に合わせる
           '-y'
         ])
         .output(outputPath)

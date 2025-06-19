@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs-extra');
 const VideoEditor = require('./video-editor');
+const SpreadsheetProcessor = require('./spreadsheet-processor');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -261,22 +262,112 @@ app.get('/api/videos', async (req, res) => {
 app.use('/uploads', express.static(uploadsDir));
 app.use('/output', express.static(outputDir));
 
-// スプレッドシート連携エンドポイント（将来用）
+// Google設定の読み込み
+let googleConfig = null;
+const configPath = path.join(__dirname, 'config', 'google-config.json');
+
+// 設定ファイルが存在する場合は読み込む
+if (fs.existsSync(configPath)) {
+  try {
+    googleConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    console.log('✅ Google設定ファイルを読み込みました');
+  } catch (error) {
+    console.error('❌ Google設定ファイルの読み込みエラー:', error);
+  }
+}
+
+// 設定を取得するエンドポイント
+app.get('/api/google-config', (req, res) => {
+  if (googleConfig) {
+    // 機密情報を一部マスクして返す
+    const maskedConfig = {
+      ...googleConfig,
+      credentials: {
+        ...googleConfig.credentials,
+        private_key: '***HIDDEN***',
+        private_key_id: '***HIDDEN***'
+      }
+    };
+    res.json({ exists: true, config: maskedConfig });
+  } else {
+    res.json({ exists: false });
+  }
+});
+
+// スプレッドシート連携エンドポイント
 app.post('/api/spreadsheet-sync', async (req, res) => {
   try {
-    // TODO: 後でスプレッドシート連携機能を実装
+    // リクエストボディから値を取得、存在しない場合は設定ファイルから
+    const { 
+      spreadsheetId = googleConfig?.spreadsheetId, 
+      credentials = googleConfig?.credentials, 
+      range = googleConfig?.range || 'A:L',
+      driveFolderId = googleConfig?.driveFolderId || null 
+    } = req.body;
+
+    if (!spreadsheetId || !credentials) {
+      return res.status(400).json({
+        error: 'spreadsheetIdとcredentialsは必須です（リクエストボディまたは設定ファイルで指定してください）'
+      });
+    }
+
+    // スプレッドシートプロセッサーを初期化
+    const processor = new SpreadsheetProcessor();
+    await processor.initialize(credentials);
+
+    // スプレッドシートを処理
+    const result = await processor.processSpreadsheet(spreadsheetId, {
+      range,
+      driveFolderId
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('スプレッドシート連携エラー:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// スプレッドシート定期処理の開始エンドポイント
+app.post('/api/spreadsheet-sync/start-periodic', async (req, res) => {
+  try {
+    // リクエストボディから値を取得、存在しない場合は設定ファイルから
+    const { 
+      spreadsheetId = googleConfig?.spreadsheetId, 
+      credentials = googleConfig?.credentials, 
+      intervalMinutes = googleConfig?.autoProcessInterval || 5,
+      range = googleConfig?.range || 'A:L',
+      driveFolderId = googleConfig?.driveFolderId || null 
+    } = req.body;
+
+    if (!spreadsheetId || !credentials) {
+      return res.status(400).json({
+        error: 'spreadsheetIdとcredentialsは必須です（リクエストボディまたは設定ファイルで指定してください）'
+      });
+    }
+
+    // スプレッドシートプロセッサーを初期化
+    const processor = new SpreadsheetProcessor();
+    await processor.initialize(credentials);
+
+    // 定期処理を開始
+    processor.startPeriodicProcessing(spreadsheetId, intervalMinutes, {
+      range,
+      driveFolderId
+    });
+
     res.json({
       success: true,
-      message: 'スプレッドシート連携機能は準備中です',
-      data: req.body
+      message: `${intervalMinutes}分ごとの定期処理を開始しました`
     });
   } catch (error) {
+    console.error('定期処理開始エラー:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // サーバー起動
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log('🚀 Web Video Editor Started');
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log('📁 Uploads:', uploadsDir);
@@ -284,4 +375,26 @@ app.listen(PORT, () => {
   console.log('🔄 Version: 2024-12-06-v5 (Japanese UI + Debug logs)');
   console.log(`📅 Deployed at: ${new Date().toISOString()}`);
   console.log('✅ Server is ready to accept requests');
+
+  // 設定ファイルが存在し、自動処理が有効な場合は起動
+  if (googleConfig && googleConfig.autoProcessEnabled) {
+    console.log('🤖 Google設定ファイルから自動処理を開始します...');
+    try {
+      const processor = new SpreadsheetProcessor();
+      await processor.initialize(googleConfig.credentials);
+      
+      await processor.startPeriodicProcessing(
+        googleConfig.spreadsheetId,
+        googleConfig.autoProcessInterval || 5,
+        {
+          range: googleConfig.range || 'A:L',
+          driveFolderId: googleConfig.driveFolderId || null
+        }
+      );
+      
+      console.log(`✅ 自動処理を開始しました（${googleConfig.autoProcessInterval || 5}分間隔）`);
+    } catch (error) {
+      console.error('❌ 自動処理の開始に失敗しました:', error);
+    }
+  }
 });
