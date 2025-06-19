@@ -264,17 +264,30 @@ app.use('/output', express.static(outputDir));
 
 // Google設定の読み込み
 let googleConfig = null;
-const configPath = path.join(__dirname, 'config', 'google-config.json');
 
-// 設定ファイルが存在する場合は読み込む
-if (fs.existsSync(configPath)) {
+// 環境変数から設定を読み込む（Render用）
+if (process.env.GOOGLE_CONFIG) {
   try {
-    googleConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    console.log('✅ Google設定ファイルを読み込みました');
+    googleConfig = JSON.parse(process.env.GOOGLE_CONFIG);
+    console.log('✅ 環境変数からGoogle設定を読み込みました');
   } catch (error) {
-    console.error('❌ Google設定ファイルの読み込みエラー:', error);
+    console.error('❌ 環境変数のGoogle設定パースエラー:', error);
   }
 }
+
+// 環境変数にない場合は設定ファイルから読み込む
+if (!googleConfig) {
+  const configPath = path.join(__dirname, 'config', 'google-config.json');
+  if (fs.existsSync(configPath)) {
+    try {
+      googleConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      console.log('✅ Google設定ファイルを読み込みました');
+    } catch (error) {
+      console.error('❌ Google設定ファイルの読み込みエラー:', error);
+    }
+  }
+}
+
 
 // 設定を取得するエンドポイント
 app.get('/api/google-config', (req, res) => {
@@ -291,6 +304,38 @@ app.get('/api/google-config', (req, res) => {
     res.json({ exists: true, config: maskedConfig });
   } else {
     res.json({ exists: false });
+  }
+});
+
+// 設定を保存するエンドポイント（Render環境用）
+app.post('/api/google-config', async (req, res) => {
+  try {
+    const newConfig = req.body;
+    
+    // 設定を検証
+    if (!newConfig.spreadsheetId || !newConfig.credentials) {
+      return res.status(400).json({ error: '必須フィールドが不足しています' });
+    }
+    
+    // メモリに保存（Render環境では再起動時に消える）
+    googleConfig = newConfig;
+    
+    // 可能であればファイルにも保存
+    const configDir = path.join(__dirname, 'config');
+    const configPath = path.join(configDir, 'google-config.json');
+    
+    try {
+      await fs.ensureDir(configDir);
+      await fs.writeJson(configPath, newConfig, { spaces: 2 });
+      console.log('✅ Google設定をファイルに保存しました');
+    } catch (error) {
+      console.log('⚠️ ファイルへの保存は失敗しましたが、メモリには保存されています');
+    }
+    
+    res.json({ success: true, message: '設定を保存しました' });
+  } catch (error) {
+    console.error('設定保存エラー:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
