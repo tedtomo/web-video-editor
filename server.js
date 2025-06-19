@@ -427,7 +427,8 @@ app.post('/api/spreadsheet-sync', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('スプレッドシート連携エラー:', error);
-    res.status(500).json({ error: error.message });
+    console.error('エラー詳細:', error.stack);
+    res.status(500).json({ error: error.message, details: error.stack });
   }
 });
 

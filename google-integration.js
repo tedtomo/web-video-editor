@@ -52,6 +52,11 @@ class GoogleIntegration {
         this.auth = oauth2Client;
       }
 
+      // JWTの場合、認証を実行
+      if (credentials.type === 'service_account') {
+        await this.auth.authorize();
+      }
+      
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });
       this.drive = google.drive({ version: 'v3', auth: this.auth });
     } catch (error) {
