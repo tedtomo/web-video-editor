@@ -36,18 +36,28 @@ class SpreadsheetProcessor {
   }
 
   async initialize(credentials) {
+    console.log('📌 SpreadsheetProcessor初期化開始');
+    console.log('📋 認証情報の存在確認:', !!credentials);
+    console.log('📋 認証タイプ:', credentials?.type);
+    
     await this.googleIntegration.initialize(credentials);
     await fs.ensureDir(this.tempDir);
     await fs.ensureDir(this.outputDir);
+    
+    console.log('✅ SpreadsheetProcessor初期化完了');
   }
 
   // スプレッドシートからバッチ処理を実行
   async processSpreadsheet(spreadsheetId, options = {}) {
+    console.log('🚀 processSpreadsheet開始');
+    console.log('📋 GoogleIntegration初期化済み?:', !!this.googleIntegration.auth);
+    
     const results = [];
     const { range = 'A:L', driveFolderId = null } = options;
 
     try {
       // 実行対象の行を取得
+      console.log('📊 スプレッドシートから行を取得中...');
       const executionRows = await this.googleIntegration.getExecutionRows(spreadsheetId, range);
       
       if (executionRows.length === 0) {
