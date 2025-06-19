@@ -214,16 +214,9 @@ class SpreadsheetProcessor {
           console.log('✅ 動画生成完了:', row.outputFileName);
           const videoUrl = `/output/${row.outputFileName}`;
 
-          // スプレッドシートを更新
-          const urlResult = await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
-          const flagResult = await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
-          
-          // 更新結果をログに記録
-          if (urlResult.updated && flagResult.updated) {
-            console.log(`📝 スプレッドシート更新完了: 行${row.rowIndex}`);
-          } else {
-            console.log(`📝 スプレッドシート更新スキップ: 行${row.rowIndex} (Google Apps Script未設定)`);
-          }
+          // スプレッドシート用のURL情報を記録
+          await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
+          await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
 
           // 一時ファイルを削除
           await this.cleanupTempFiles([imagePath, videoPath, audioPath]);
@@ -247,12 +240,25 @@ class SpreadsheetProcessor {
         }
       }
 
+      const successResults = results.filter(r => r.success);
+      const failedResults = results.filter(r => !r.success);
+
+      // 成功した動画のURL一覧を生成（コピペ用）
+      if (successResults.length > 0) {
+        this.publicSheetsIntegration.generateCopyPasteData(successResults);
+      }
+
       return {
         success: true,
         totalProcessed: executionRows.length,
-        successful: results.filter(r => r.success).length,
-        failed: results.filter(r => !r.success).length,
-        results: results
+        successful: successResults.length,
+        failed: failedResults.length,
+        results: results,
+        copyPasteUrls: successResults.map(r => ({
+          rowIndex: r.rowIndex,
+          fileName: r.fileName,
+          url: r.videoUrl.startsWith('http') ? r.videoUrl : `https://web-video-editor.onrender.com${r.videoUrl}`
+        }))
       };
     } catch (error) {
       console.error('スプレッドシート処理エラー:', error);

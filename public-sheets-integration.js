@@ -156,74 +156,44 @@ class PublicSheetsIntegration {
     }
   }
 
-  // スプレッドシートを更新（Google Apps Script経由）
-  async updateSheet(spreadsheetId, updates) {
-    try {
-      // Google Apps Script Web App URLを環境変数から取得
-      const scriptId = process.env.GOOGLE_APPS_SCRIPT_ID;
-      if (!scriptId) {
-        throw new Error('GOOGLE_APPS_SCRIPT_ID環境変数が設定されていません');
-      }
+  // 簡単コピペ用のURLリストを生成
+  generateCopyPasteData(results) {
+    console.log('\n📋 ===== スプレッドシート貼り付け用データ =====');
+    console.log('以下をコピーしてスプレッドシートのL列に貼り付けてください：\n');
+    
+    const urls = results.map(result => {
+      const fullUrl = result.videoUrl.startsWith('http') 
+        ? result.videoUrl 
+        : `https://web-video-editor.onrender.com${result.videoUrl}`;
       
-      const webAppUrl = `https://script.google.com/macros/s/${scriptId}/exec`;
-      
-      console.log('📝 Google Apps Script経由でスプレッドシート更新を試行中...');
-      
-      const response = await axios.post(webAppUrl, {
-        spreadsheetId,
-        updates
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
-
-      if (response.data.success) {
-        console.log('✅ スプレッドシート更新成功');
-        return { updated: true, message: 'Google Apps Script経由で更新成功' };
-      } else {
-        throw new Error(response.data.error || '更新に失敗しました');
-      }
-    } catch (error) {
-      console.log(`ℹ️ スプレッドシート更新失敗（通常動作）: ${error.message}`);
-      return { updated: false, message: 'Google Apps Script未設定のため更新不可', error: error.message };
-    }
+      console.log(`行${result.rowIndex}: ${fullUrl}`);
+      return fullUrl;
+    });
+    
+    console.log('\n📋 一括コピー用（縦に並んだURL）:');
+    console.log(urls.join('\n'));
+    console.log('\n📋 ============================================\n');
+    
+    return urls;
   }
 
   async clearExecutionFlag(spreadsheetId, rowIndex) {
-    console.log(`🔄 行${rowIndex}の実行フラグをクリア中...`);
-    
-    const result = await this.updateSheet(spreadsheetId, [{
-      range: `A${rowIndex}`,
-      value: ''
-    }]);
-    
-    if (!result.updated) {
-      console.log(`ℹ️ 行${rowIndex}の実行フラグをクリアできません（手動でスプレッドシートから○を削除してください）`);
-    }
-    
-    return result;
+    console.log(`ℹ️ 行${rowIndex}の実行フラグ（○）を手動で削除してください`);
+    return { updated: false, message: '手動削除が必要' };
   }
 
   async recordVideoUrl(spreadsheetId, rowIndex, videoUrl) {
-    console.log(`📋 行${rowIndex}に動画URL（${videoUrl}）を記録中...`);
-    
     // RenderのURLをフルURLに変換
     const fullVideoUrl = videoUrl.startsWith('http') ? videoUrl : `https://web-video-editor.onrender.com${videoUrl}`;
     
-    const result = await this.updateSheet(spreadsheetId, [{
-      range: `L${rowIndex}`,
-      value: fullVideoUrl
-    }]);
+    console.log(`📋 行${rowIndex}に貼り付けるURL: ${fullVideoUrl}`);
     
-    if (result.updated) {
-      console.log(`✅ 行${rowIndex}に動画URLを記録しました: ${fullVideoUrl}`);
-    } else {
-      console.log(`ℹ️ 行${rowIndex}に動画URL（${fullVideoUrl}）を記録できません（手動でスプレッドシートに貼り付けてください）`);
-    }
-    
-    return { ...result, videoUrl: fullVideoUrl };
+    return { 
+      updated: false, 
+      message: '手動貼り付けが必要', 
+      videoUrl: fullVideoUrl,
+      rowIndex: rowIndex
+    };
   }
 }
 
