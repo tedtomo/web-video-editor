@@ -33,14 +33,17 @@ class GoogleIntegration {
     try {
       // サービスアカウントまたはOAuth2認証を使用
       if (credentials.type === 'service_account') {
-        this.auth = new google.auth.JWT({
-          email: credentials.client_email,
-          key: credentials.private_key,
-          scopes: [
+        // JWT認証の正しい形式
+        this.auth = new google.auth.JWT(
+          credentials.client_email,
+          null,
+          credentials.private_key,
+          [
             'https://www.googleapis.com/auth/spreadsheets',
-            'https://www.googleapis.com/auth/drive.file'
+            'https://www.googleapis.com/auth/drive.file',
+            'https://www.googleapis.com/auth/drive.readonly'
           ]
-        });
+        );
       } else {
         // OAuth2認証の場合
         const oauth2Client = new google.auth.OAuth2(
@@ -54,7 +57,14 @@ class GoogleIntegration {
 
       // JWTの場合、認証を実行
       if (credentials.type === 'service_account') {
-        await this.auth.authorize();
+        console.log('🔑 サービスアカウント認証を実行中...');
+        try {
+          await this.auth.authorize();
+          console.log('✅ 認証成功');
+        } catch (authError) {
+          console.error('❌ 認証エラー:', authError);
+          throw new Error(`Google認証に失敗しました: ${authError.message}`);
+        }
       }
       
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });
