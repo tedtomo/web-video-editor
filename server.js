@@ -270,22 +270,32 @@ console.log('🔍 環境変数GOOGLE_CONFIGの存在確認:', !!process.env.GOOG
 console.log('🔍 環境変数の長さ:', process.env.GOOGLE_CONFIG?.length || 0);
 if (process.env.GOOGLE_CONFIG) {
   try {
-    console.log('🔍 JSON文字列の最初の200文字:', process.env.GOOGLE_CONFIG.substring(0, 200));
-    console.log('🔍 JSON文字列の最後の100文字:', process.env.GOOGLE_CONFIG.substring(process.env.GOOGLE_CONFIG.length - 100));
+    let configString = process.env.GOOGLE_CONFIG;
     
-    // Renderの環境変数の改行を処理
-    // 1. まず全ての実際の改行を特殊文字に置換
-    let cleanedConfig = process.env.GOOGLE_CONFIG
-      .replace(/\r\n/g, '__NEWLINE__')
-      .replace(/\n/g, '__NEWLINE__')
-      .replace(/\r/g, '__NEWLINE__');
+    // Base64エンコードされているかチェック
+    if (!configString.startsWith('{')) {
+      console.log('🔍 Base64エンコードされた設定を検出');
+      // Base64デコード
+      configString = Buffer.from(configString, 'base64').toString('utf-8');
+      console.log('🔍 デコード後の最初の200文字:', configString.substring(0, 200));
+    } else {
+      console.log('🔍 JSON文字列の最初の200文字:', configString.substring(0, 200));
+      console.log('🔍 JSON文字列の最後の100文字:', configString.substring(configString.length - 100));
+      
+      // Renderの環境変数の改行を処理
+      // 1. まず全ての実際の改行を特殊文字に置換
+      let cleanedConfig = configString
+        .replace(/\r\n/g, '__NEWLINE__')
+        .replace(/\n/g, '__NEWLINE__')
+        .replace(/\r/g, '__NEWLINE__');
+      
+      // 2. 特殊文字を削除（JSON内の文字列リテラル\\nは保持される）
+      configString = cleanedConfig.replace(/__NEWLINE__/g, '');
+      
+      console.log('🔍 クリーニング後の最初の200文字:', configString.substring(0, 200));
+    }
     
-    // 2. 特殊文字を削除（JSON内の文字列リテラル\\nは保持される）
-    cleanedConfig = cleanedConfig.replace(/__NEWLINE__/g, '');
-    
-    console.log('🔍 クリーニング後の最初の200文字:', cleanedConfig.substring(0, 200));
-    
-    googleConfig = JSON.parse(cleanedConfig);
+    googleConfig = JSON.parse(configString);
     
     // private_keyの改行文字を確実に処理
     if (googleConfig.credentials && googleConfig.credentials.private_key) {
