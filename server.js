@@ -297,7 +297,8 @@ if (process.env.GOOGLE_CONFIG) {
     // 簡単な修正を試す
     try {
       const trimmedValue = envValue.trim();
-      const testConfig = JSON.parse(trimmedValue);
+      const cleanedValue = trimmedValue.replace(/\n/g, '').replace(/\r/g, '');
+      const testConfig = JSON.parse(cleanedValue);
       console.log('✅ trim()後のパースに成功しました');
       googleConfig = testConfig;
     } catch (retryError) {
