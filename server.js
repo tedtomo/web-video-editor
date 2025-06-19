@@ -273,8 +273,18 @@ if (process.env.GOOGLE_CONFIG) {
     console.log('🔍 JSON文字列の最初の200文字:', process.env.GOOGLE_CONFIG.substring(0, 200));
     console.log('🔍 JSON文字列の最後の100文字:', process.env.GOOGLE_CONFIG.substring(process.env.GOOGLE_CONFIG.length - 100));
     
-    // 改行を削除してからパース（ただしprivate_key内の改行は保持）
-    const cleanedConfig = process.env.GOOGLE_CONFIG.replace(/\r/g, '');
+    // Renderの環境変数の改行を処理
+    // 1. まず全ての実際の改行を特殊文字に置換
+    let cleanedConfig = process.env.GOOGLE_CONFIG
+      .replace(/\r\n/g, '__NEWLINE__')
+      .replace(/\n/g, '__NEWLINE__')
+      .replace(/\r/g, '__NEWLINE__');
+    
+    // 2. 特殊文字を削除（JSON内の文字列リテラル\\nは保持される）
+    cleanedConfig = cleanedConfig.replace(/__NEWLINE__/g, '');
+    
+    console.log('🔍 クリーニング後の最初の200文字:', cleanedConfig.substring(0, 200));
+    
     googleConfig = JSON.parse(cleanedConfig);
     
     // private_keyの改行文字を確実に処理
@@ -302,8 +312,16 @@ if (process.env.GOOGLE_CONFIG) {
     
     // 簡単な修正を試す
     try {
-      const trimmedValue = envValue.trim();
-      const cleanedValue = trimmedValue.replace(/\r/g, '');
+      // 同じクリーニング処理を適用
+      let cleanedValue = envValue
+        .replace(/\r\n/g, '__NEWLINE__')
+        .replace(/\n/g, '__NEWLINE__')
+        .replace(/\r/g, '__NEWLINE__');
+      
+      cleanedValue = cleanedValue.replace(/__NEWLINE__/g, '').trim();
+      
+      console.log('🔍 リトライ時のクリーニング後:', cleanedValue.substring(0, 200));
+      
       const testConfig = JSON.parse(cleanedValue);
       
       // private_keyの改行文字を確実に処理
