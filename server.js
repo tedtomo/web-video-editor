@@ -273,9 +273,15 @@ if (process.env.GOOGLE_CONFIG) {
     console.log('🔍 JSON文字列の最初の200文字:', process.env.GOOGLE_CONFIG.substring(0, 200));
     console.log('🔍 JSON文字列の最後の100文字:', process.env.GOOGLE_CONFIG.substring(process.env.GOOGLE_CONFIG.length - 100));
     
-    // 改行を削除してからパース
-    const cleanedConfig = process.env.GOOGLE_CONFIG.replace(/\n/g, '').replace(/\r/g, '');
+    // 改行を削除してからパース（ただしprivate_key内の改行は保持）
+    const cleanedConfig = process.env.GOOGLE_CONFIG.replace(/\r/g, '');
     googleConfig = JSON.parse(cleanedConfig);
+    
+    // private_keyの改行文字を確実に処理
+    if (googleConfig.credentials && googleConfig.credentials.private_key) {
+      // private_keyに含まれる\\nを実際の改行に変換
+      googleConfig.credentials.private_key = googleConfig.credentials.private_key.replace(/\\n/g, '\n');
+    }
     console.log('✅ 環境変数からGoogle設定を読み込みました');
     console.log('📋 読み込んだ設定:', {
       spreadsheetId: googleConfig.spreadsheetId,
@@ -297,8 +303,14 @@ if (process.env.GOOGLE_CONFIG) {
     // 簡単な修正を試す
     try {
       const trimmedValue = envValue.trim();
-      const cleanedValue = trimmedValue.replace(/\n/g, '').replace(/\r/g, '');
+      const cleanedValue = trimmedValue.replace(/\r/g, '');
       const testConfig = JSON.parse(cleanedValue);
+      
+      // private_keyの改行文字を確実に処理
+      if (testConfig.credentials && testConfig.credentials.private_key) {
+        testConfig.credentials.private_key = testConfig.credentials.private_key.replace(/\\n/g, '\n');
+      }
+      
       console.log('✅ trim()後のパースに成功しました');
       googleConfig = testConfig;
     } catch (retryError) {
