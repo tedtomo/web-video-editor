@@ -273,7 +273,9 @@ if (process.env.GOOGLE_CONFIG) {
     console.log('🔍 JSON文字列の最初の200文字:', process.env.GOOGLE_CONFIG.substring(0, 200));
     console.log('🔍 JSON文字列の最後の100文字:', process.env.GOOGLE_CONFIG.substring(process.env.GOOGLE_CONFIG.length - 100));
     
-    googleConfig = JSON.parse(process.env.GOOGLE_CONFIG);
+    // 改行を削除してからパース
+    const cleanedConfig = process.env.GOOGLE_CONFIG.replace(/\n/g, '').replace(/\r/g, '');
+    googleConfig = JSON.parse(cleanedConfig);
     console.log('✅ 環境変数からGoogle設定を読み込みました');
     console.log('📋 読み込んだ設定:', {
       spreadsheetId: googleConfig.spreadsheetId,
