@@ -1013,12 +1013,15 @@
             document.getElementById('progress-message').textContent = 'スプレッドシートを処理しています...';
             
             try {
+                console.log('🚀 フロントエンド: 公開スプレッドシート処理開始');
                 const response = await fetch('/api/spreadsheet-sync', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({})  // 設定ファイルから自動的に読み込まれる
+                    body: JSON.stringify({
+                        spreadsheetId: "1FKi7HNRslOk3qQt4unygWrRUHlEs2RH41W3Y499ahTs"
+                    })
                 });
                 
                 const result = await response.json();

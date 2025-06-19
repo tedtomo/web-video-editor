@@ -1,4 +1,5 @@
 const { google } = require('googleapis');
+const { GoogleAuth } = require('google-auth-library');
 const fs = require('fs-extra');
 const path = require('path');
 const axios = require('axios');
@@ -31,70 +32,38 @@ class GoogleIntegration {
   // 認証初期化
   async initialize(credentials) {
     try {
-      console.log('🔐 Google認証初期化開始');
+      console.log('🔐 Google認証初期化開始 (最新バージョン v2)');
       console.log('📋 認証タイプ:', credentials.type);
       console.log('📧 クライアントメール:', credentials.client_email);
       console.log('🔑 プライベートキーの最初の50文字:', credentials.private_key?.substring(0, 50) + '...');
       
-      // サービスアカウントまたはOAuth2認証を使用
-      // typeフィールドの空白を除去して比較
+      // サービスアカウント認証のみをサポート
       const authType = credentials.type?.trim();
       console.log('🔍 認証タイプ（トリム後）:', authType);
       
-      if (authType === 'service_account') {
-        // JWT認証の正しい形式
-        this.auth = new google.auth.JWT(
-          credentials.client_email,
-          null,
-          credentials.private_key,
-          [
-            'https://www.googleapis.com/auth/spreadsheets',
-            'https://www.googleapis.com/auth/drive.file',
-            'https://www.googleapis.com/auth/drive.readonly'
-          ]
-        );
-      } else {
-        // OAuth2認証の場合
-        const oauth2Client = new google.auth.OAuth2(
-          credentials.client_id,
-          credentials.client_secret,
-          credentials.redirect_uri
-        );
-        oauth2Client.setCredentials(credentials.tokens);
-        this.auth = oauth2Client;
+      if (authType !== 'service_account') {
+        throw new Error('サービスアカウント認証のみサポートしています');
       }
 
-      // JWTの場合、認証を実行
-      if (authType === 'service_account') {
-        console.log('🔑 サービスアカウント認証を実行中...');
-        console.log('🔍 authオブジェクトの確認:', !!this.auth);
-        console.log('🔍 authorizeメソッドの存在:', typeof this.auth.authorize);
-        
-        try {
-          const authClient = await this.auth.authorize();
-          console.log('✅ 認証成功');
-          console.log('🔍 認証結果:', !!authClient);
-          
-          // 認証結果があればそれを使用
-          if (authClient) {
-            this.auth = authClient;
-          }
-        } catch (authError) {
-          console.error('❌ 認証エラー:', authError);
-          console.error('❌ エラー詳細:', authError.stack);
-          
-          // access_tokenエラーの場合、プライベートキーの問題の可能性
-          if (authError.message && authError.message.includes('access_token')) {
-            console.error('❌ プライベートキーが正しくフォーマットされていない可能性があります');
-            console.error('❌ キーの改行文字を確認してください');
-          }
-          
-          throw new Error(`Google認証に失敗しました: ${authError.message}`);
-        }
-      }
+      // GoogleAuthを使用してJWT認証を初期化
+      const auth = new GoogleAuth({
+        credentials: credentials,
+        scopes: [
+          'https://www.googleapis.com/auth/spreadsheets',
+          'https://www.googleapis.com/auth/drive.file',
+          'https://www.googleapis.com/auth/drive.readonly'
+        ]
+      });
+
+      console.log('🔑 GoogleAuth認証クライアント取得中...');
+      this.auth = await auth.getClient();
+      console.log('✅ 認証クライアント取得成功');
+      console.log('🔍 authクライアントのタイプ:', this.auth.constructor.name);
       
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });
       this.drive = google.drive({ version: 'v3', auth: this.auth });
+      
+      console.log('✅ Google API初期化完了');
     } catch (error) {
       console.error('Google API初期化エラー:', error);
       throw error;
@@ -104,6 +73,7 @@ class GoogleIntegration {
   // スプレッドシートから実行対象の行を取得
   async getExecutionRows(spreadsheetId, range = 'A:L') {
     try {
+      console.log('📊 スプレッドシート読み取り開始 (最新バージョン v2)');
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId,
         range

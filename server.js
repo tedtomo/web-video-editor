@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs-extra');
 const VideoEditor = require('./video-editor');
-const SpreadsheetProcessor = require('./spreadsheet-processor');
+// const SpreadsheetProcessor = require('./spreadsheet-processor'); // 公開リンク方式では不要
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -453,77 +453,123 @@ app.post('/api/google-config', async (req, res) => {
   }
 });
 
-// スプレッドシート連携エンドポイント
-app.post('/api/spreadsheet-sync', async (req, res) => {
+// 新しい公開スプレッドシート連携エンドポイント（認証不要）
+app.post('/api/spreadsheet-sync-public', async (req, res) => {
   try {
-    // リクエストボディから値を取得、存在しない場合は設定ファイルから
-    const { 
-      spreadsheetId = googleConfig?.spreadsheetId, 
-      credentials = googleConfig?.credentials, 
-      range = googleConfig?.range || 'A:L',
-      driveFolderId = googleConfig?.driveFolderId || null 
-    } = req.body;
+    const { spreadsheetId, sheetName = null } = req.body;
 
-    if (!spreadsheetId || !credentials) {
+    if (!spreadsheetId) {
       return res.status(400).json({
-        error: 'spreadsheetIdとcredentialsは必須です（リクエストボディまたは設定ファイルで指定してください）'
+        error: 'spreadsheetIdは必須です'
       });
     }
 
-    // スプレッドシートプロセッサーを初期化
-    const processor = new SpreadsheetProcessor();
-    await processor.initialize(credentials);
+    console.log('🚀 公開スプレッドシート処理開始');
+    console.log('📋 スプレッドシートID:', spreadsheetId);
+    console.log('📋 シート名:', sheetName || '最初のシート');
 
-    // スプレッドシートを処理
-    const result = await processor.processSpreadsheet(spreadsheetId, {
-      range,
-      driveFolderId
-    });
+    // 公開スプレッドシート専用プロセッサーを直接使用
+    const PublicSheetsIntegration = require('./public-sheets-integration');
+    const publicIntegration = new PublicSheetsIntegration();
 
-    res.json(result);
-  } catch (error) {
-    console.error('スプレッドシート連携エラー:', error);
-    console.error('エラー詳細:', error.stack);
-    res.status(500).json({ error: error.message, details: error.stack });
-  }
-});
+    // データを取得
+    const executionRows = await publicIntegration.getExecutionRows(spreadsheetId, sheetName);
 
-// スプレッドシート定期処理の開始エンドポイント
-app.post('/api/spreadsheet-sync/start-periodic', async (req, res) => {
-  try {
-    // リクエストボディから値を取得、存在しない場合は設定ファイルから
-    const { 
-      spreadsheetId = googleConfig?.spreadsheetId, 
-      credentials = googleConfig?.credentials, 
-      intervalMinutes = googleConfig?.autoProcessInterval || 5,
-      range = googleConfig?.range || 'A:L',
-      driveFolderId = googleConfig?.driveFolderId || null 
-    } = req.body;
-
-    if (!spreadsheetId || !credentials) {
-      return res.status(400).json({
-        error: 'spreadsheetIdとcredentialsは必須です（リクエストボディまたは設定ファイルで指定してください）'
+    if (executionRows.length === 0) {
+      return res.json({
+        success: true,
+        message: '実行対象の行（○マーク）がありません',
+        totalRows: 0,
+        results: []
       });
     }
 
-    // スプレッドシートプロセッサーを初期化
-    const processor = new SpreadsheetProcessor();
-    await processor.initialize(credentials);
-
-    // 定期処理を開始
-    processor.startPeriodicProcessing(spreadsheetId, intervalMinutes, {
-      range,
-      driveFolderId
-    });
+    console.log(`✅ ${executionRows.length}件の実行対象行を発見`);
 
     res.json({
       success: true,
-      message: `${intervalMinutes}分ごとの定期処理を開始しました`
+      message: `${executionRows.length}件の処理対象が見つかりました（実際の動画処理は後で実装します）`,
+      totalRows: executionRows.length,
+      results: executionRows.map(row => ({
+        rowIndex: row.rowIndex,
+        outputFileName: row.outputFileName,
+        hasImage: !!row.imageUrl,
+        hasVideo: !!row.videoUrl,
+        hasAudio: !!row.audioUrl
+      }))
     });
+
   } catch (error) {
-    console.error('定期処理開始エラー:', error);
+    console.error('公開スプレッドシート連携エラー:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// スプレッドシート連携エンドポイント（公開リンク方式に変更）
+app.post('/api/spreadsheet-sync', async (req, res) => {
+  try {
+    const { 
+      spreadsheetId = googleConfig?.spreadsheetId,
+      sheetName = null
+    } = req.body;
+
+    if (!spreadsheetId) {
+      return res.status(400).json({
+        error: 'spreadsheetIdは必須です'
+      });
+    }
+
+    console.log('🚀 公開スプレッドシート処理開始（メインエンドポイント）');
+    console.log('📋 スプレッドシートID:', spreadsheetId);
+    console.log('📋 シート名:', sheetName || '最初のシート');
+
+    // 公開スプレッドシート専用プロセッサーを直接使用
+    const PublicSheetsIntegration = require('./public-sheets-integration');
+    const publicIntegration = new PublicSheetsIntegration();
+
+    // データを取得
+    const executionRows = await publicIntegration.getExecutionRows(spreadsheetId, sheetName);
+
+    if (executionRows.length === 0) {
+      return res.json({
+        success: true,
+        message: '実行対象の行（○マーク）がありません',
+        totalRows: 0,
+        results: []
+      });
+    }
+
+    console.log(`✅ ${executionRows.length}件の実行対象行を発見`);
+
+    res.json({
+      success: true,
+      message: `${executionRows.length}件の処理対象が見つかりました`,
+      totalRows: executionRows.length,
+      results: executionRows.map(row => ({
+        rowIndex: row.rowIndex,
+        outputFileName: row.outputFileName,
+        hasImage: !!row.imageUrl,
+        hasVideo: !!row.videoUrl,
+        hasAudio: !!row.audioUrl,
+        duration: row.duration,
+        imageUrl: row.imageUrl,
+        videoUrl: row.videoUrl,
+        audioUrl: row.audioUrl
+      }))
+    });
+
+  } catch (error) {
+    console.error('公開スプレッドシート連携エラー:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// スプレッドシート定期処理の開始エンドポイント（公開リンク方式では無効化）
+app.post('/api/spreadsheet-sync/start-periodic', async (req, res) => {
+  res.json({
+    success: false,
+    message: '公開リンク方式では定期処理は無効化されています。手動で実行してください。'
+  });
 });
 
 // サーバー起動
@@ -536,25 +582,6 @@ app.listen(PORT, async () => {
   console.log(`📅 Deployed at: ${new Date().toISOString()}`);
   console.log('✅ Server is ready to accept requests');
 
-  // 設定ファイルが存在し、自動処理が有効な場合は起動
-  if (googleConfig && googleConfig.autoProcessEnabled) {
-    console.log('🤖 Google設定ファイルから自動処理を開始します...');
-    try {
-      const processor = new SpreadsheetProcessor();
-      await processor.initialize(googleConfig.credentials);
-      
-      await processor.startPeriodicProcessing(
-        googleConfig.spreadsheetId,
-        googleConfig.autoProcessInterval || 5,
-        {
-          range: googleConfig.range || 'A:L',
-          driveFolderId: googleConfig.driveFolderId || null
-        }
-      );
-      
-      console.log(`✅ 自動処理を開始しました（${googleConfig.autoProcessInterval || 5}分間隔）`);
-    } catch (error) {
-      console.error('❌ 自動処理の開始に失敗しました:', error);
-    }
-  }
+  // 自動処理は無効化（公開リンク方式では手動実行のみ）
+  console.log('ℹ️ 自動処理は公開リンク方式では無効化されています');
 });

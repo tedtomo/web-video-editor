@@ -1,4 +1,4 @@
-const GoogleIntegration = require('./google-integration');
+const PublicSheetsIntegration = require('./public-sheets-integration');
 const SimpleDriveDownloader = require('./simple-drive-downloader');
 const VideoEditor = require('./video-editor');
 const FileCache = require('./file-cache');
@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 class SpreadsheetProcessor {
   constructor() {
-    this.googleIntegration = new GoogleIntegration();
+    this.publicSheetsIntegration = new PublicSheetsIntegration();
     this.simpleDriveDownloader = new SimpleDriveDownloader();
     this.videoEditor = new VideoEditor();
     this.fileCache = new FileCache();
@@ -35,30 +35,29 @@ class SpreadsheetProcessor {
     return fileName;
   }
 
-  async initialize(credentials) {
-    console.log('📌 SpreadsheetProcessor初期化開始');
-    console.log('📋 認証情報の存在確認:', !!credentials);
-    console.log('📋 認証タイプ:', credentials?.type);
+  async initialize(credentials = null) {
+    console.log('📌 SpreadsheetProcessor初期化開始（公開リンク方式 v2）');
+    console.log('📋 認証不要のため、credentials は無視されます');
     
-    await this.googleIntegration.initialize(credentials);
+    // 認証不要！
     await fs.ensureDir(this.tempDir);
     await fs.ensureDir(this.outputDir);
     
-    console.log('✅ SpreadsheetProcessor初期化完了');
+    console.log('✅ SpreadsheetProcessor初期化完了（公開リンク方式 v2）');
   }
 
   // スプレッドシートからバッチ処理を実行
   async processSpreadsheet(spreadsheetId, options = {}) {
-    console.log('🚀 processSpreadsheet開始');
-    console.log('📋 GoogleIntegration初期化済み?:', !!this.googleIntegration.auth);
+    console.log('🚀 processSpreadsheet開始（公開リンク方式 v2）');
+    console.log('📋 認証不要の公開リンク方式を使用');
     
     const results = [];
-    const { range = 'A:L', driveFolderId = null } = options;
+    const { sheetName = null, driveFolderId = null } = options;
 
     try {
-      // 実行対象の行を取得
-      console.log('📊 スプレッドシートから行を取得中...');
-      const executionRows = await this.googleIntegration.getExecutionRows(spreadsheetId, range);
+      // 実行対象の行を取得（公開リンク方式）
+      console.log('📊 公開スプレッドシートから行を取得中...');
+      const executionRows = await this.publicSheetsIntegration.getExecutionRows(spreadsheetId, sheetName);
       
       if (executionRows.length === 0) {
         return {
@@ -173,38 +172,6 @@ class SpreadsheetProcessor {
             } else {
               console.log('- 音声: ✗');
             }
-          } else {
-            // 従来のGoogle Drive APIを使用
-            const downloadErrors = [];
-            
-            try {
-              if (row.imageUrl) {
-                await this.googleIntegration.downloadFromDrive(row.imageUrl, imagePath);
-              }
-            } catch (error) {
-              downloadErrors.push(`画像: ${error.message}`);
-            }
-            
-            try {
-              if (row.videoUrl) {
-                await this.googleIntegration.downloadFromDrive(row.videoUrl, videoPath);
-              }
-            } catch (error) {
-              downloadErrors.push(`動画: ${error.message}`);
-            }
-            
-            try {
-              if (row.audioUrl) {
-                await this.googleIntegration.downloadFromDrive(row.audioUrl, audioPath);
-              }
-            } catch (error) {
-              downloadErrors.push(`音声: ${error.message}`);
-            }
-            
-            // エラーがある場合はまとめて報告
-            if (downloadErrors.length > 0) {
-              throw new Error(`ファイルのダウンロードに失敗しました:\n${downloadErrors.join('\n')}`);
-            }
           }
 
           // 動画を生成（柔軟な処理）
@@ -227,17 +194,13 @@ class SpreadsheetProcessor {
             filterOpacity: row.filterOpacity / 100 // パーセントを小数に変換（0-1の範囲）
           });
 
-          // Google Driveにアップロード
-          console.log('Google Driveにアップロード中...');
-          const videoUrl = await this.googleIntegration.uploadToDrive(
-            outputResult.path,  // オブジェクトからパスを取得
-            row.outputFileName,
-            driveFolderId
-          );
+          // ローカル出力フォルダに保存（Drive API認証不要）
+          console.log('動画ファイルを出力フォルダに保存...');
+          const videoUrl = `/output/${row.outputFileName}`;
 
-          // スプレッドシートを更新
-          await this.googleIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
-          await this.googleIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
+          // スプレッドシートを更新（公開リンク方式では更新不可）
+          await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
+          await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
 
           // 一時ファイルを削除
           await this.cleanupTempFiles([imagePath, videoPath, audioPath]);
@@ -285,7 +248,7 @@ class SpreadsheetProcessor {
 
   // 定期的な処理を実行
   async startPeriodicProcessing(spreadsheetId, intervalMinutes = 5, options = {}) {
-    console.log(`${intervalMinutes}分ごとに自動処理を開始します`);
+    console.log(`${intervalMinutes}分ごとに自動処理を開始します（公開リンク方式）`);
     
     // 初回実行
     await this.processSpreadsheet(spreadsheetId, options);
