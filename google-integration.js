@@ -37,7 +37,11 @@ class GoogleIntegration {
       console.log('🔑 プライベートキーの最初の50文字:', credentials.private_key?.substring(0, 50) + '...');
       
       // サービスアカウントまたはOAuth2認証を使用
-      if (credentials.type === 'service_account') {
+      // typeフィールドの空白を除去して比較
+      const authType = credentials.type?.trim();
+      console.log('🔍 認証タイプ（トリム後）:', authType);
+      
+      if (authType === 'service_account') {
         // JWT認証の正しい形式
         this.auth = new google.auth.JWT(
           credentials.client_email,
@@ -61,7 +65,7 @@ class GoogleIntegration {
       }
 
       // JWTの場合、認証を実行
-      if (credentials.type === 'service_account') {
+      if (authType === 'service_account') {
         console.log('🔑 サービスアカウント認証を実行中...');
         console.log('🔍 authオブジェクトの確認:', !!this.auth);
         console.log('🔍 authorizeメソッドの存在:', typeof this.auth.authorize);

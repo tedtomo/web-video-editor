@@ -291,6 +291,14 @@ if (process.env.GOOGLE_CONFIG) {
     if (googleConfig.credentials && googleConfig.credentials.private_key) {
       // private_keyに含まれる\\nを実際の改行に変換
       googleConfig.credentials.private_key = googleConfig.credentials.private_key.replace(/\\n/g, '\n');
+      
+      // 他のフィールドの余分な空白も除去
+      if (googleConfig.credentials.type) {
+        googleConfig.credentials.type = googleConfig.credentials.type.trim();
+      }
+      if (googleConfig.credentials.client_email) {
+        googleConfig.credentials.client_email = googleConfig.credentials.client_email.trim();
+      }
     }
     console.log('✅ 環境変数からGoogle設定を読み込みました');
     console.log('📋 読み込んだ設定:', {
@@ -327,6 +335,14 @@ if (process.env.GOOGLE_CONFIG) {
       // private_keyの改行文字を確実に処理
       if (testConfig.credentials && testConfig.credentials.private_key) {
         testConfig.credentials.private_key = testConfig.credentials.private_key.replace(/\\n/g, '\n');
+        
+        // 他のフィールドの余分な空白も除去
+        if (testConfig.credentials.type) {
+          testConfig.credentials.type = testConfig.credentials.type.trim();
+        }
+        if (testConfig.credentials.client_email) {
+          testConfig.credentials.client_email = testConfig.credentials.client_email.trim();
+        }
       }
       
       console.log('✅ trim()後のパースに成功しました');
