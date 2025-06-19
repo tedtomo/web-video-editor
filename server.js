@@ -300,6 +300,8 @@ if (!googleConfig) {
 
 // 設定を取得するエンドポイント
 app.get('/api/google-config', (req, res) => {
+  console.log('🔍 /api/google-config called, googleConfig exists:', !!googleConfig);
+  
   if (googleConfig) {
     // 機密情報を一部マスクして返す
     const maskedConfig = {
@@ -312,14 +314,30 @@ app.get('/api/google-config', (req, res) => {
     };
     res.json({ exists: true, config: maskedConfig });
   } else {
+    const debug = {
+      hasEnvVar: !!process.env.GOOGLE_CONFIG,
+      envVarLength: process.env.GOOGLE_CONFIG ? process.env.GOOGLE_CONFIG.length : 0,
+      configFileExists: require('fs').existsSync(require('path').join(__dirname, 'config', 'google-config.json'))
+    };
+    console.log('❌ googleConfig is null, debug info:', debug);
     res.json({ 
       exists: false,
-      debug: {
-        hasEnvVar: !!process.env.GOOGLE_CONFIG,
-        configFileExists: require('fs').existsSync(require('path').join(__dirname, 'config', 'google-config.json'))
-      }
+      debug
     });
   }
+});
+
+// デバッグ用エンドポイント（一時的）
+app.get('/api/debug-config', (req, res) => {
+  res.json({
+    hasGoogleConfig: !!googleConfig,
+    hasEnvVar: !!process.env.GOOGLE_CONFIG,
+    envVarLength: process.env.GOOGLE_CONFIG ? process.env.GOOGLE_CONFIG.length : 0,
+    envVarFirstChars: process.env.GOOGLE_CONFIG ? process.env.GOOGLE_CONFIG.substring(0, 50) + '...' : null,
+    configFileExists: require('fs').existsSync(require('path').join(__dirname, 'config', 'google-config.json')),
+    nodeEnv: process.env.NODE_ENV,
+    platform: process.platform
+  });
 });
 
 // 設定を保存するエンドポイント（Render環境用）
