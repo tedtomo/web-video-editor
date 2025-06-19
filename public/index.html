@@ -1027,14 +1027,41 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    if (result.totalProcessed === 0) {
+                    if (result.totalRows === 0) {
                         showAlert('error', '実行対象の行がありません。スプレッドシートで実行対象に○を入力してください。');
+                    } else if (result.processing) {
+                        // 処理開始の場合
+                        showAlert('success', `🎬 ${result.totalRows}件の動画処理を開始しました。バックグラウンドで処理中です...`);
+                        
+                        // 定期的に動画リストを更新（処理完了を検出）
+                        const checkInterval = setInterval(async () => {
+                            try {
+                                await loadVideos();
+                                const videos = await fetch('/api/videos').then(r => r.json());
+                                const newVideos = videos.filter(v => 
+                                    result.results.some(r => r.outputFileName === v.filename)
+                                );
+                                
+                                if (newVideos.length === result.totalRows) {
+                                    clearInterval(checkInterval);
+                                    showAlert('success', `🎉 全${result.totalRows}件の動画処理が完了しました！`);
+                                }
+                            } catch (error) {
+                                console.log('動画リスト更新中:', error);
+                            }
+                        }, 10000); // 10秒ごとにチェック
+                        
+                        // 最大5分でタイムアウト
+                        setTimeout(() => {
+                            clearInterval(checkInterval);
+                            showAlert('info', '処理に時間がかかっています。Renderのログを確認してください。');
+                        }, 300000);
+                        
                     } else {
-                        // エラーがある場合は詳細を表示
+                        // 通常の完了処理（従来のコード）
                         if (result.failed > 0) {
                             showAlert('error', `処理完了: ${result.successful}件成功、${result.failed}件失敗`);
                             
-                            // 失敗の詳細を表示
                             const failedResults = result.results.filter(item => !item.success);
                             failedResults.forEach((item, index) => {
                                 setTimeout(() => {
@@ -1045,17 +1072,8 @@
                             showAlert('success', `🎉 処理完了: ${result.successful}件の動画を作成しました！`);
                         }
                         
-                        // 成功した動画がある場合は、動画リストを更新
                         if (result.successful > 0) {
                             await loadVideos();
-                            
-                            // 成功した動画の詳細を表示
-                            const successResults = result.results.filter(item => item.success);
-                            successResults.forEach((item, index) => {
-                                setTimeout(() => {
-                                    showAlert('success', `✅ ${item.fileName}: 作成完了`);
-                                }, 200 * (index + 1));
-                            });
                         }
                         
                         // 詳細結果をコンソールに表示

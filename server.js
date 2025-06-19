@@ -541,15 +541,34 @@ app.post('/api/spreadsheet-sync', async (req, res) => {
 
     console.log(`✅ ${executionRows.length}件の実行対象行を発見`);
 
-    // 実際の動画処理を実行
-    const processor = require('./spreadsheet-processor');
-    const processorInstance = new processor();
-    await processorInstance.initialize();
+    // 即座にレスポンスを返す（非同期処理開始）
+    res.json({
+      success: true,
+      message: `${executionRows.length}件の動画処理を開始しました。処理完了まで数分お待ちください。`,
+      totalRows: executionRows.length,
+      processing: true,
+      results: executionRows.map(row => ({
+        rowIndex: row.rowIndex,
+        outputFileName: row.outputFileName,
+        status: 'processing'
+      }))
+    });
 
-    console.log('🎬 動画処理を開始します...');
-    const result = await processorInstance.processSpreadsheet(spreadsheetId, { sheetName });
+    // バックグラウンドで動画処理を実行
+    setImmediate(async () => {
+      try {
+        const processor = require('./spreadsheet-processor');
+        const processorInstance = new processor();
+        await processorInstance.initialize();
 
-    res.json(result);
+        console.log('🎬 バックグラウンドで動画処理を開始します...');
+        const result = await processorInstance.processSpreadsheet(spreadsheetId, { sheetName });
+        
+        console.log('🎉 全ての動画処理が完了しました:', result);
+      } catch (error) {
+        console.error('❌ バックグラウンド処理エラー:', error);
+      }
+    });
 
   } catch (error) {
     console.error('公開スプレッドシート連携エラー:', error);
