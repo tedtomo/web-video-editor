@@ -196,8 +196,8 @@ app.post('/api/edit-video', async (req, res) => {
     
     console.log('✅ ファイル確認完了');
 
-    // 動画編集実行
-    const result = await videoEditor.createCompositeVideo({
+    // 動画編集実行（柔軟な処理）
+    const result = await videoEditor.createFlexibleVideo({
       backgroundVideoPath,
       imagePath,
       audioPath,
