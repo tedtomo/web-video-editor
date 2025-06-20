@@ -26,20 +26,8 @@ function executeVideoProcessing() {
   const sheet = SpreadsheetApp.getActiveSheet();
   const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
   
-  // 実行確認
-  const ui = SpreadsheetApp.getUi();
-  const response = ui.alert(
-    '動画処理を開始',
-    '○マークが付いている行の動画を作成します。\n続行しますか？',
-    ui.ButtonSet.YES_NO
-  );
-  
-  if (response !== ui.Button.YES) {
-    return;
-  }
-  
-  // 処理開始を通知
-  ui.alert('処理開始', '動画処理を開始しました。\n処理完了まで数分かかる場合があります。', ui.ButtonSet.OK);
+  // 通知を最小限に（トーストで表示）
+  SpreadsheetApp.getActiveSpreadsheet().toast('処理を開始しています...', '🎬 動画処理', 3);
   
   try {
     // Web Video EditorのAPIを呼び出し
@@ -60,15 +48,11 @@ function executeVideoProcessing() {
     
     if (response.getResponseCode() === 200) {
       if (result.processing) {
-        // 非同期処理開始
-        ui.alert(
-          '処理開始',
-          `${result.totalRows}件の動画処理を開始しました。\n\n` +
-          '処理はバックグラウンドで実行されます。\n' +
-          '完了すると自動的に：\n' +
-          '・L列に動画URLが記録されます\n' +
-          '・A列の○マークが削除されます',
-          ui.ButtonSet.OK
+        // 非同期処理開始（トースト通知のみ）
+        SpreadsheetApp.getActiveSpreadsheet().toast(
+          `${result.totalRows}件の処理を開始しました。完了時にお知らせします。`,
+          '🎬 処理中',
+          5
         );
         
         // 処理状況を定期的にチェック（最大10分）
@@ -76,18 +60,26 @@ function executeVideoProcessing() {
         
       } else {
         // 同期処理完了（通常はこちらは使われない）
-        ui.alert(
-          '処理完了',
-          `処理が完了しました。\n成功: ${result.successful}件\n失敗: ${result.failed}件`,
-          ui.ButtonSet.OK
+        SpreadsheetApp.getActiveSpreadsheet().toast(
+          `処理完了: 成功${result.successful}件、失敗${result.failed}件`,
+          '✅ 完了',
+          5
         );
       }
     } else {
-      ui.alert('エラー', `処理に失敗しました。\n${result.error || 'Unknown error'}`, ui.ButtonSet.OK);
+      SpreadsheetApp.getActiveSpreadsheet().toast(
+        `エラー: ${result.error || 'Unknown error'}`,
+        '❌ エラー',
+        10
+      );
     }
     
   } catch (error) {
-    ui.alert('エラー', `処理中にエラーが発生しました。\n${error.toString()}`, ui.ButtonSet.OK);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      `エラー: ${error.toString()}`,
+      '❌ エラー',
+      10
+    );
   }
 }
 
@@ -138,10 +130,11 @@ function checkProcessingStatusOnce() {
   
   // 全て完了していたら通知してトリガーを削除
   if (completedCount >= expectedCount) {
-    SpreadsheetApp.getUi().alert(
-      '処理完了',
-      `全${expectedCount}件の動画処理が完了しました！\n\nL列に動画URLが記録され、A列の○マークが削除されました。`,
-      SpreadsheetApp.getUi().ButtonSet.OK
+    // トースト通知のみ（ポップアップなし）
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      `全${expectedCount}件の処理が完了しました！`,
+      '🎉 完了',
+      10
     );
     
     removeTriggerById(triggerId);
@@ -246,12 +239,9 @@ function showSettings() {
  */
 function install() {
   onOpen();
-  const ui = SpreadsheetApp.getUi();
-  ui.alert(
-    'インストール完了',
-    'Web Video Editorがインストールされました。\n\n' +
-    'メニューバーに「🎬 動画エディター」が追加されました。\n' +
-    'このメニューから動画処理を実行できます。',
-    ui.ButtonSet.OK
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    'メニューに「🎬 動画エディター」が追加されました',
+    '✅ セットアップ完了',
+    5
   );
 }
