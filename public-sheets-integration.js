@@ -156,26 +156,6 @@ class PublicSheetsIntegration {
     }
   }
 
-  // 簡単コピペ用のURLリストを生成
-  generateCopyPasteData(results) {
-    console.log('\n📋 ===== スプレッドシート貼り付け用データ =====');
-    console.log('以下をコピーしてスプレッドシートのL列に貼り付けてください：\n');
-    
-    const urls = results.map(result => {
-      const fullUrl = result.videoUrl.startsWith('http') 
-        ? result.videoUrl 
-        : `https://web-video-editor.onrender.com${result.videoUrl}`;
-      
-      console.log(`行${result.rowIndex}: ${fullUrl}`);
-      return fullUrl;
-    });
-    
-    console.log('\n📋 一括コピー用（縦に並んだURL）:');
-    console.log(urls.join('\n'));
-    console.log('\n📋 ============================================\n');
-    
-    return urls;
-  }
 
   // Google Sheets APIで直接更新（編集者権限が必要）
   async updateSheetDirect(spreadsheetId, range, value) {

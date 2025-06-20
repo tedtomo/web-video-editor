@@ -252,11 +252,6 @@ class SpreadsheetProcessor {
       const successResults = results.filter(r => r.success);
       const failedResults = results.filter(r => !r.success);
 
-      // 成功した動画のURL一覧を生成（コピペ用）
-      if (successResults.length > 0) {
-        this.publicSheetsIntegration.generateCopyPasteData(successResults);
-      }
-
       return {
         success: true,
         totalProcessed: executionRows.length,
