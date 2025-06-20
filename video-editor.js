@@ -31,6 +31,18 @@ class VideoEditor {
     return seconds;
   }
 
+  // ファイルタイプを判定（画像か動画か）
+  async getFileType(filePath) {
+    if (!filePath) return null;
+    const ext = path.extname(filePath).toLowerCase();
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v'];
+    
+    if (imageExtensions.includes(ext)) return 'image';
+    if (videoExtensions.includes(ext)) return 'video';
+    return 'unknown';
+  }
+
   // 柔軟な動画作成（利用可能なファイルに応じて処理）
   async createFlexibleVideo({
     backgroundVideoPath,
@@ -46,32 +58,52 @@ class VideoEditor {
   }) {
     // 利用可能なファイルを確認
     const hasVideo = backgroundVideoPath && await fs.pathExists(backgroundVideoPath);
-    const hasImage = imagePath && await fs.pathExists(imagePath);
+    const hasOverlay = imagePath && await fs.pathExists(imagePath);
     const hasAudio = audioPath && await fs.pathExists(audioPath);
+    
+    // オーバーレイファイルのタイプを判定
+    const overlayType = hasOverlay ? await this.getFileType(imagePath) : null;
 
     console.log('📁 利用可能なファイル:');
-    console.log('- 動画:', hasVideo ? `✓ (${backgroundVideoPath})` : `✗ (${backgroundVideoPath})`);
-    console.log('- 画像:', hasImage ? `✓ (${imagePath})` : `✗ (${imagePath})`);
+    console.log('- 背景動画:', hasVideo ? `✓ (${backgroundVideoPath})` : `✗ (${backgroundVideoPath})`);
+    console.log('- オーバーレイ:', hasOverlay ? `✓ (${overlayType}: ${imagePath})` : `✗ (${imagePath})`);
     console.log('- 音声:', hasAudio ? `✓ (${audioPath})` : `✗ (${audioPath})`);
 
-    // すべてのファイルがある場合は従来の処理
-    if (hasVideo && hasImage && hasAudio) {
-      return this.createCompositeVideo({
-        backgroundVideoPath,
-        imagePath,
-        audioPath,
-        duration,
-        videoStart,
-        audioStart,
-        outputName,
-        imageScale,
-        filterColor,
-        filterOpacity
-      });
+    // すべてのファイルがある場合（画像または動画オーバーレイ）
+    if (hasVideo && hasOverlay && hasAudio) {
+      if (overlayType === 'image') {
+        // 従来の画像オーバーレイ処理
+        return this.createCompositeVideo({
+          backgroundVideoPath,
+          imagePath,
+          audioPath,
+          duration,
+          videoStart,
+          audioStart,
+          outputName,
+          imageScale,
+          filterColor,
+          filterOpacity
+        });
+      } else if (overlayType === 'video') {
+        // 新しい動画オーバーレイ処理
+        return this.createCompositeVideoWithVideoOverlay({
+          backgroundVideoPath,
+          overlayVideoPath: imagePath,
+          audioPath,
+          duration,
+          videoStart,
+          audioStart,
+          outputName,
+          imageScale,
+          filterColor,
+          filterOpacity
+        });
+      }
     }
 
     // 音声のみの場合は、黒い背景の動画を作成
-    if (!hasVideo && !hasImage && hasAudio) {
+    if (!hasVideo && !hasOverlay && hasAudio) {
       return this.createAudioOnlyVideo({
         audioPath,
         duration,
@@ -81,7 +113,7 @@ class VideoEditor {
     }
 
     // 動画と音声のみの場合
-    if (hasVideo && !hasImage && hasAudio) {
+    if (hasVideo && !hasOverlay && hasAudio) {
       console.log('🎬 動画と音声のみで処理します');
       return this.createVideoWithAudio({
         videoPath: backgroundVideoPath,
@@ -93,23 +125,37 @@ class VideoEditor {
       });
     }
 
-    // 動画と画像のみの場合（音声なし）
-    if (hasVideo && hasImage && !hasAudio) {
-      console.log('🎬 動画と画像のみで処理します（音声なし）');
-      return this.createVideoWithImageOnly({
-        videoPath: backgroundVideoPath,
-        imagePath,
-        duration,
-        videoStart,
-        outputName,
-        imageScale,
-        filterColor,
-        filterOpacity
-      });
+    // 動画とオーバーレイのみの場合（音声なし）
+    if (hasVideo && hasOverlay && !hasAudio) {
+      if (overlayType === 'image') {
+        console.log('🎬 動画と画像のみで処理します（音声なし）');
+        return this.createVideoWithImageOnly({
+          videoPath: backgroundVideoPath,
+          imagePath,
+          duration,
+          videoStart,
+          outputName,
+          imageScale,
+          filterColor,
+          filterOpacity
+        });
+      } else if (overlayType === 'video') {
+        console.log('🎬 動画と動画オーバーレイのみで処理します（音声なし）');
+        return this.createVideoWithVideoOverlayOnly({
+          videoPath: backgroundVideoPath,
+          overlayVideoPath: imagePath,
+          duration,
+          videoStart,
+          outputName,
+          imageScale,
+          filterColor,
+          filterOpacity
+        });
+      }
     }
 
     // 動画のみの場合
-    if (hasVideo && !hasImage && !hasAudio) {
+    if (hasVideo && !hasOverlay && !hasAudio) {
       console.log('🎬 動画のみで処理します');
       return this.createVideoOnly({
         videoPath: backgroundVideoPath,
@@ -120,7 +166,7 @@ class VideoEditor {
     }
 
     // その他の組み合わせも必要に応じて追加可能
-    console.error('利用可能なファイル組み合わせではありません:', { hasVideo, hasImage, hasAudio });
+    console.error('利用可能なファイル組み合わせではありません:', { hasVideo, hasOverlay, hasAudio, overlayType });
     throw new Error('有効なファイルの組み合わせではありません');
   }
 
@@ -376,6 +422,239 @@ class VideoEditor {
         .on('error', (err) => {
           console.error('❌ FFmpeg エラー:', err.message);
           reject(new Error(`動画生成失敗: ${err.message}`));
+        })
+        .run();
+    });
+  }
+
+  // 動画オーバーレイと音声を含む複合動画作成
+  async createCompositeVideoWithVideoOverlay({
+    backgroundVideoPath,
+    overlayVideoPath,
+    audioPath,
+    duration,
+    videoStart = 0,
+    audioStart = 0,
+    outputName,
+    imageScale = 0.8,
+    filterColor = '#000000',
+    filterOpacity = 0
+  }) {
+    const outputPath = path.join(this.outputDir, outputName);
+    
+    console.log('🎬 動画オーバーレイ合成設定:');
+    console.log('- 背景動画:', backgroundVideoPath);
+    console.log('- オーバーレイ動画:', overlayVideoPath);
+    console.log('- 音声:', audioPath);
+    console.log('- 時間長:', duration, '秒');
+    console.log('- 動画開始:', videoStart, '秒');
+    console.log('- 音声開始:', audioStart, '秒');
+    console.log('- オーバーレイスケール:', imageScale * 100, '%');
+    console.log('- フィルター色:', filterColor);
+    console.log('- フィルター透明度:', filterOpacity * 100, '%');
+    console.log('- 出力:', outputPath);
+
+    return new Promise((resolve, reject) => {
+      const ff = ffmpeg();
+      
+      // 入力ファイルを追加
+      ff.input(backgroundVideoPath)
+        .inputOptions([
+          '-ss', this.parseTimeToSeconds(videoStart).toString(), 
+          '-t', duration.toString(),
+          '-vsync', '0'
+        ])
+        .input(audioPath)
+        .inputOptions(['-ss', this.parseTimeToSeconds(audioStart).toString(), '-t', duration.toString()])
+        .input(overlayVideoPath)
+        .inputOptions([
+          '-ss', '0',  // オーバーレイ動画は最初から再生
+          '-t', duration.toString(),
+          '-vsync', '0'
+        ]);
+        
+      // フィルターチェーンを構築
+      console.log('🎨 動画オーバーレイフィルター適用判定:', { filterOpacity, filterColor, apply: filterOpacity > 0 });
+      
+      let filterComplex = '';
+      
+      // オーバーレイ動画をスケール
+      filterComplex += `[2:v]scale=w='min(iw*${imageScale},1920)':h='min(ih*${imageScale},1080)':force_original_aspect_ratio=decrease[scaled];`;
+      
+      // 動画を背景動画にオーバーレイ
+      filterComplex += '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite];';
+      
+      // カラーフィルターを適用
+      if (filterOpacity > 0) {
+        const r = parseInt(filterColor.substr(1, 2), 16);
+        const g = parseInt(filterColor.substr(3, 2), 16);
+        const b = parseInt(filterColor.substr(5, 2), 16);
+        
+        const rNorm = r / 255;
+        const gNorm = g / 255;
+        const bNorm = b / 255;
+        const opacity = filterOpacity;
+        
+        const rr = 1 - opacity + rNorm * opacity;
+        const gg = 1 - opacity + gNorm * opacity;
+        const bb = 1 - opacity + bNorm * opacity;
+        
+        filterComplex += `[composite]colorchannelmixer=rr=${rr}:gg=${gg}:bb=${bb}[outv]`;
+        console.log('✅ カラーフィルター適用:', filterColor, '透明度:', (opacity * 100).toFixed(0) + '%');
+      } else {
+        filterComplex += '[composite]copy[outv]';
+        console.log('⏭️ フィルターをスキップ（透明度が0）');
+      }
+      
+      console.log('📐 動画オーバーレイ フィルターチェーン:', filterComplex);
+      ff.complexFilter(filterComplex);
+      
+      // 出力設定
+      ff.outputOptions([
+          '-map', '[outv]',
+          '-map', '1:a',
+          '-c:v', 'libx264',
+          '-c:a', 'copy',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-threads', '2',
+          '-max_muxing_queue_size', '1024',
+          '-shortest',
+          '-y'
+        ])
+        .output(outputPath)
+        
+        .on('start', (commandLine) => {
+          console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('stderr', (stderrLine) => {
+          console.log('FFmpeg:', stderrLine);
+        })
+        .on('progress', (progress) => {
+          if (progress.percent) {
+            console.log(`⏳ 進行状況: ${Math.round(progress.percent)}% | 時間: ${progress.timemark || 'N/A'} | 速度: ${progress.currentKbps || 'N/A'} kbps`);
+          }
+        })
+        .on('end', () => {
+          console.log('✅ 動画オーバーレイ合成完了:', outputName);
+          resolve({
+            filename: outputName,
+            path: outputPath,
+            url: `/output/${outputName}`
+          });
+        })
+        .on('error', (err) => {
+          console.error('❌ FFmpeg エラー:', err.message);
+          console.error('詳細:', err);
+          reject(new Error(`動画オーバーレイ合成失敗: ${err.message}`));
+        });
+        
+      // タイムアウト設定（5分）
+      const timeout = setTimeout(() => {
+        console.error('⏱️ タイムアウト: 5分経過したため処理を中止します');
+        ff.kill('SIGKILL');
+        reject(new Error('動画処理がタイムアウトしました（5分経過）'));
+      }, 300000);
+      
+      ff.on('end', () => {
+        clearTimeout(timeout);
+      }).on('error', () => {
+        clearTimeout(timeout);
+      });
+      
+      ff.run();
+    });
+  }
+
+  // 動画とオーバーレイ動画のみの処理（音声なし）
+  async createVideoWithVideoOverlayOnly({
+    videoPath,
+    overlayVideoPath,
+    duration,
+    videoStart = 0,
+    outputName,
+    imageScale = 0.8,
+    filterColor = '#000000',
+    filterOpacity = 0
+  }) {
+    const outputPath = path.join(this.outputDir, outputName);
+    
+    console.log('🎬 動画と動画オーバーレイを結合（音声なし）:');
+    console.log('- 背景動画:', videoPath);
+    console.log('- オーバーレイ動画:', overlayVideoPath);
+    console.log('- 時間長:', duration, '秒');
+
+    return new Promise((resolve, reject) => {
+      const ff = ffmpeg();
+      
+      ff.input(videoPath)
+        .inputOptions(['-ss', videoStart.toString(), '-t', duration.toString()])
+        .input(overlayVideoPath)
+        .inputOptions(['-ss', '0', '-t', duration.toString()]);
+
+      // フィルターチェーンを構築
+      console.log('🎨 動画オーバーレイフィルター適用判定:', { filterOpacity, filterColor, apply: filterOpacity > 0 });
+      
+      let filterComplex = '';
+      
+      // オーバーレイ動画をスケール
+      filterComplex += `[1:v]scale=w='min(iw*${imageScale},1920)':h='min(ih*${imageScale},1080)':force_original_aspect_ratio=decrease[scaled];`;
+      
+      // 動画を背景動画にオーバーレイ
+      filterComplex += '[0:v][scaled]overlay=x=(W-w)/2:y=(H-h)/2[composite];';
+      
+      // カラーフィルターを適用
+      if (filterOpacity > 0) {
+        const r = parseInt(filterColor.substr(1, 2), 16);
+        const g = parseInt(filterColor.substr(3, 2), 16);
+        const b = parseInt(filterColor.substr(5, 2), 16);
+        
+        const rNorm = r / 255;
+        const gNorm = g / 255;
+        const bNorm = b / 255;
+        const opacity = filterOpacity;
+        
+        const rr = 1 - opacity + rNorm * opacity;
+        const gg = 1 - opacity + gNorm * opacity;
+        const bb = 1 - opacity + bNorm * opacity;
+        
+        filterComplex += `[composite]colorchannelmixer=rr=${rr}:gg=${gg}:bb=${bb}[outv]`;
+        console.log('✅ カラーフィルター適用:', filterColor, '透明度:', (opacity * 100).toFixed(0) + '%');
+      } else {
+        filterComplex += '[composite]copy[outv]';
+        console.log('⏭️ フィルターをスキップ（透明度が0）');
+      }
+      
+      console.log('📐 最終フィルターチェーン:', filterComplex);
+      ff.complexFilter(filterComplex);
+
+      // 出力設定（音声なし）
+      ff.outputOptions([
+          '-map', '[outv]',
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-threads', '1',
+          '-max_muxing_queue_size', '1024',
+          '-y'
+        ])
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          console.log('🔧 FFmpeg コマンド:', commandLine);
+        })
+        .on('end', () => {
+          console.log('✅ 動画オーバーレイ処理完了:', outputName);
+          resolve({
+            filename: outputName,
+            path: outputPath,
+            url: `/output/${outputName}`
+          });
+        })
+        .on('error', (err) => {
+          console.error('❌ FFmpeg エラー:', err.message);
+          reject(new Error(`動画オーバーレイ処理失敗: ${err.message}`));
         })
         .run();
     });
