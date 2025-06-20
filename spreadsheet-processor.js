@@ -214,9 +214,18 @@ class SpreadsheetProcessor {
           console.log('✅ 動画生成完了:', row.outputFileName);
           const videoUrl = `/output/${row.outputFileName}`;
 
-          // スプレッドシート用のURL情報を記録
-          await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
-          await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
+          // スプレッドシートを自動更新
+          const urlResult = await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
+          const flagResult = await this.publicSheetsIntegration.clearExecutionFlag(spreadsheetId, row.rowIndex);
+          
+          // 更新結果を記録
+          if (urlResult.updated && flagResult.updated) {
+            console.log(`🎉 スプレッドシート自動更新完了: 行${row.rowIndex}`);
+          } else {
+            console.log(`⚠️ スプレッドシート更新に失敗: 行${row.rowIndex}`);
+            if (!urlResult.updated) console.log(`   - URL記録失敗: ${urlResult.message}`);
+            if (!flagResult.updated) console.log(`   - フラグクリア失敗: ${flagResult.message}`);
+          }
 
           // 一時ファイルを削除
           await this.cleanupTempFiles([imagePath, videoPath, audioPath]);

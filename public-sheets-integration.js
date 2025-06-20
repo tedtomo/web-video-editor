@@ -177,20 +177,90 @@ class PublicSheetsIntegration {
     return urls;
   }
 
+  // Google Sheets APIで直接更新（編集者権限が必要）
+  async updateSheetDirect(spreadsheetId, range, value) {
+    try {
+      // 環境変数からGoogle認証情報を取得
+      const googleConfigString = process.env.GOOGLE_CONFIG;
+      if (!googleConfigString) {
+        throw new Error('GOOGLE_CONFIG環境変数が設定されていません');
+      }
+
+      // Base64デコード
+      let configString = googleConfigString;
+      if (!configString.startsWith('{')) {
+        configString = Buffer.from(configString, 'base64').toString('utf-8');
+      }
+
+      const googleConfig = JSON.parse(configString);
+      const credentials = googleConfig.credentials;
+
+      if (!credentials || credentials.type !== 'service_account') {
+        throw new Error('サービスアカウント認証情報が必要です');
+      }
+
+      // Google Sheets APIで直接更新
+      const { GoogleAuth } = require('google-auth-library');
+      const { google } = require('googleapis');
+
+      const auth = new GoogleAuth({
+        credentials: credentials,
+        scopes: ['https://www.googleapis.com/auth/spreadsheets']
+      });
+
+      const authClient = await auth.getClient();
+      const sheets = google.sheets({ version: 'v4', auth: authClient });
+
+      console.log(`🔄 Sheets API で ${range} を更新中: "${value}"`);
+
+      const response = await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [[value]]
+        }
+      });
+
+      console.log(`✅ Sheets API 更新成功: ${range}`);
+      return { updated: true, message: 'Sheets API経由で更新成功', response: response.data };
+
+    } catch (error) {
+      console.log(`❌ Sheets API 更新失敗: ${error.message}`);
+      return { updated: false, message: `Sheets API更新失敗: ${error.message}`, error: error.message };
+    }
+  }
+
   async clearExecutionFlag(spreadsheetId, rowIndex) {
-    console.log(`ℹ️ 行${rowIndex}の実行フラグ（○）を手動で削除してください`);
-    return { updated: false, message: '手動削除が必要' };
+    console.log(`🔄 行${rowIndex}の実行フラグ（○）をクリア中...`);
+    
+    const result = await this.updateSheetDirect(spreadsheetId, `A${rowIndex}`, '');
+    
+    if (result.updated) {
+      console.log(`✅ 行${rowIndex}の実行フラグをクリアしました`);
+    } else {
+      console.log(`ℹ️ 行${rowIndex}の実行フラグクリア失敗: ${result.message}`);
+    }
+    
+    return result;
   }
 
   async recordVideoUrl(spreadsheetId, rowIndex, videoUrl) {
     // RenderのURLをフルURLに変換
     const fullVideoUrl = videoUrl.startsWith('http') ? videoUrl : `https://web-video-editor.onrender.com${videoUrl}`;
     
-    console.log(`📋 行${rowIndex}に貼り付けるURL: ${fullVideoUrl}`);
+    console.log(`📋 行${rowIndex}に動画URL（${fullVideoUrl}）を記録中...`);
+    
+    const result = await this.updateSheetDirect(spreadsheetId, `L${rowIndex}`, fullVideoUrl);
+    
+    if (result.updated) {
+      console.log(`✅ 行${rowIndex}に動画URLを記録しました: ${fullVideoUrl}`);
+    } else {
+      console.log(`ℹ️ 行${rowIndex}に動画URL記録失敗: ${result.message}`);
+    }
     
     return { 
-      updated: false, 
-      message: '手動貼り付けが必要', 
+      ...result, 
       videoUrl: fullVideoUrl,
       rowIndex: rowIndex
     };
