@@ -227,7 +227,7 @@ class PublicSheetsIntegration {
 
   async recordVideoUrl(spreadsheetId, rowIndex, videoUrl) {
     // RenderのURLをフルURLに変換
-    const fullVideoUrl = videoUrl.startsWith('http') ? videoUrl : `https://web-video-editor.onrender.com${videoUrl}`;
+    const fullVideoUrl = videoUrl.startsWith('http') ? videoUrl : `https://web-video-editor-tedtomo.onrender.com${videoUrl}`;
     
     console.log(`📋 行${rowIndex}に動画URL（${fullVideoUrl}）を記録中...`);
     
