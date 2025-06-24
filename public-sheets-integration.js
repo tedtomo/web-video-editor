@@ -172,8 +172,7 @@ class PublicSheetsIntegration {
         configString = Buffer.from(configString, 'base64').toString('utf-8');
       }
 
-      const googleConfig = JSON.parse(configString);
-      const credentials = googleConfig.credentials;
+      const credentials = JSON.parse(configString);
 
       if (!credentials || credentials.type !== 'service_account') {
         throw new Error('サービスアカウント認証情報が必要です');
