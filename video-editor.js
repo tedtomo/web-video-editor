@@ -2,12 +2,14 @@ const ffmpeg = require('fluent-ffmpeg');
 const ffmpegStatic = require('ffmpeg-static');
 const fs = require('fs-extra');
 const path = require('path');
+const GoogleDriveUploader = require('./google-drive-uploader');
 
 class VideoEditor {
   constructor() {
     ffmpeg.setFfmpegPath(ffmpegStatic);
     this.outputDir = path.join(__dirname, 'output');
     fs.ensureDirSync(this.outputDir);
+    this.driveUploader = new GoogleDriveUploader();
   }
 
   // 時間文字列を秒数に変換

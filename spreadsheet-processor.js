@@ -212,7 +212,42 @@ class SpreadsheetProcessor {
 
           // ローカル出力フォルダに保存（Drive API認証不要）
           console.log('✅ 動画生成完了:', row.outputFileName);
-          const videoUrl = `/output/${row.outputFileName}`;
+          let videoUrl = `/output/${row.outputFileName}`;
+
+          // Google Driveにアップロード（設定されている場合）
+          if (process.env.GOOGLE_DRIVE_FOLDER_ID) {
+            try {
+              console.log('📤 Google Driveへのアップロードを開始...');
+              const GoogleIntegration = require('./google-integration');
+              const googleInt = new GoogleIntegration();
+              
+              // 環境変数から認証情報を取得
+              const googleConfigString = process.env.GOOGLE_CONFIG;
+              if (googleConfigString) {
+                let configString = googleConfigString;
+                if (!configString.startsWith('{')) {
+                  configString = Buffer.from(configString, 'base64').toString('utf-8');
+                }
+                const credentials = JSON.parse(configString);
+                
+                await googleInt.initialize(credentials);
+                
+                // Driveにアップロード
+                const driveUrl = await googleInt.uploadToDrive(
+                  outputResult.path,
+                  row.outputFileName,
+                  process.env.GOOGLE_DRIVE_FOLDER_ID
+                );
+                
+                if (driveUrl) {
+                  videoUrl = driveUrl;
+                  console.log('✅ Google Driveアップロード成功:', driveUrl);
+                }
+              }
+            } catch (error) {
+              console.error('⚠️ Google Driveアップロード失敗（ローカルURLを使用）:', error.message);
+            }
+          }
 
           // スプレッドシートを自動更新
           const urlResult = await this.publicSheetsIntegration.recordVideoUrl(spreadsheetId, row.rowIndex, videoUrl);
